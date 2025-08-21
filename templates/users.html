@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список пользователей</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .users-table th,
+        .users-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e5e9;
+        }
+        
+        .users-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .users-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .pagination a,
+        .pagination span {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #495057;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination a:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .pagination .current {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .pagination .disabled {
+            color: #adb5bd;
+            cursor: not-allowed;
+        }
+        
+        .breadcrumb {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .user-id {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .date-time {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .start-param {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .no-param {
+            color: #9e9e9e;
+            font-style: italic;
+        }
+        
+        .status {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .no-status {
+            color: #9e9e9e;
+            font-style: italic;
+        }
+        
+        .no-users {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+        
+        .status-select {
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            background: white;
+        }
+        
+        .status-form {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .close {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        
+        .close:hover {
+            opacity: 0.7;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-body p {
+            margin-bottom: 1rem;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1001;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .notification-success {
+            background: #28a745;
+        }
+        
+        .notification-error {
+            background: #dc3545;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👥 Список пользователей</h1>
+        <div class="nav-buttons">
+            <a href="{{ url_for('admin_panel') }}" class="nav-btn">🏠 Главная</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_panel') }}">🏠 Главная</a> → 👥 Пользователи
+        </div>
+        
+        <div class="card">
+            <h2>📊 Статистика</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ total_users }}</div>
+                    <div class="stat-label">Всего пользователей</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ total_pages }}</div>
+                    <div class="stat-label">Страниц</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ per_page }}</div>
+                    <div class="stat-label">На странице</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>👤 Список пользователей</h2>
+            
+            {% if users %}
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID пользователя</th>
+                            <th>Имя пользователя</th>
+                            <th>Дата регистрации</th>
+                            <th>Последняя активность</th>
+                            <th>Стартовый параметр</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr data-user-id="{{ user[0] }}">
+                            <td><span class="user-id">{{ user[0] }}</span></td>
+                            <td>{{ user[1] or 'Не указано' }}</td>
+                            <td><span class="date-time">{{ user[2] }}</span></td>
+                            <td><span class="date-time">{{ user[3] }}</span></td>
+                            <td>
+                                {% if user[4] %}
+                                    <span class="start-param">{{ user[4] }}</span>
+                                {% else %}
+                                    <span class="no-param">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user[5] %}
+                                    <span class="status">{{ user[5] }}</span>
+                                {% else %}
+                                    <span class="no-status">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-info status-change-btn" 
+                                        data-user-id="{{ user[0] }}" 
+                                        data-current-status="{{ user[5] or '' }}">
+                                    Изменить статус
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                {% if total_pages > 1 %}
+                <div class="pagination">
+                    {% if current_page > 1 %}
+                        <a href="{{ url_for('users_list', page=1) }}">« Первая</a>
+                        <a href="{{ url_for('users_list', page=current_page-1) }}">‹ Предыдущая</a>
+                    {% else %}
+                        <span class="disabled">« Первая</span>
+                        <span class="disabled">‹ Предыдущая</span>
+                    {% endif %}
+                    
+                    {% for page_num in range(max(1, current_page-2), min(total_pages+1, current_page+3)) %}
+                        {% if page_num == current_page %}
+                            <span class="current">{{ page_num }}</span>
+                        {% else %}
+                            <a href="{{ url_for('users_list', page=page_num) }}">{{ page_num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if current_page < total_pages %}
+                        <a href="{{ url_for('users_list', page=current_page+1) }}">Следующая ›</a>
+                        <a href="{{ url_for('users_list', page=total_pages) }}">Последняя »</a>
+                    {% else %}
+                        <span class="disabled">Следующая ›</span>
+                        <span class="disabled">Последняя »</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="no-users">
+                    <p>Пользователей пока нет</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="card">
+            <h2>ℹ️ Информация</h2>
+            <p><strong>ID пользователя:</strong> Уникальный идентификатор пользователя в Telegram</p>
+            <p><strong>Имя пользователя:</strong> Username пользователя (если указан)</p>
+            <p><strong>Дата регистрации:</strong> Когда пользователь впервые использовал бота</p>
+            <p><strong>Последняя активность:</strong> Время последнего взаимодействия с ботом</p>
+            <p><strong>Стартовый параметр:</strong> Параметр, с которым пользователь запустил бота</p>
+            <p><strong>Статус:</strong> Текущий статус пользователя в системе</p>
+            <p><strong>Действия:</strong> Возможность изменить статус пользователя</p>
+            <p><strong>Пагинация:</strong> На каждой странице отображается до {{ per_page }} пользователей</p>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для изменения статуса -->
+    <div id="statusModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Изменить статус пользователя</h3>
+                <span class="close" onclick="closeStatusModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p><strong>ID пользователя:</strong> <span id="modalUserId"></span></p>
+                <p><strong>Текущий статус:</strong> <span id="modalCurrentStatus"></span></p>
+                
+                <div class="form-group">
+                    <label for="newStatusSelect">Новый статус:</label>
+                    <select id="newStatusSelect" class="status-select">
+                        <option value="">Выберите статус</option>
+                        <option value="Нажал старт">Нажал старт</option>
+                        <option value="Прошел капчу">Прошел капчу</option>
+                        <option value="Посмотрел ответы">Посмотрел ответы</option>
+                        <option value="Посмотрел приватный урок">Посмотрел приватный урок</option>
+                        <option value="Посмотрел тарифы">Посмотрел тарифы</option>
+                        <option value="Посмотрел тарифы одежда">Посмотрел тарифы одежда</option>
+                        <option value="Посмотрел тарифы техника">Посмотрел тарифы техника</option>
+                        <option value="Нажал оплатить техника">Нажал оплатить техника</option>
+                        <option value="Нажал оплатить одежда">Нажал оплатить одежда</option>
+                        <option value="Оплатил одежду">Оплатил одежду</option>
+                        <option value="Оплатил технику">Оплатил технику</option>
+                    </select>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-success" onclick="updateUserStatus()">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeStatusModal()">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentUserId = null;
+        
+        function openStatusModal(userId, currentStatus) {
+            currentUserId = userId;
+            document.getElementById('modalUserId').textContent = userId;
+            document.getElementById('modalCurrentStatus').textContent = currentStatus || 'Не установлен';
+            document.getElementById('newStatusSelect').value = '';
+            document.getElementById('statusModal').style.display = 'block';
+        }
+        
+        function closeStatusModal() {
+            document.getElementById('statusModal').style.display = 'none';
+            currentUserId = null;
+        }
+        
+        async function updateUserStatus() {
+            const newStatus = document.getElementById('newStatusSelect').value;
+            
+            if (!newStatus) {
+                alert('Пожалуйста, выберите новый статус');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/update-user-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUserId,
+                        new_status: newStatus
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Обновляем статус в таблице без перезагрузки
+                    const statusCell = document.querySelector(`tr[data-user-id="${currentUserId}"] td:nth-child(6) span`);
+                    if (statusCell) {
+                        statusCell.textContent = newStatus;
+                        statusCell.className = 'status';
+                    }
+                    
+                    // Показываем уведомление
+                    showNotification(result.message, 'success');
+                    closeStatusModal();
+                } else {
+                    showNotification(result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Произошла ошибка при обновлении статуса', 'error');
+            }
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Закрытие модального окна при клике вне его
+        window.onclick = function(event) {
+            const modal = document.getElementById('statusModal');
+            if (event.target === modal) {
+                closeStatusModal();
+            }
+        }
+        
+        // Event delegation for status change buttons
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('status-change-btn')) {
+                const userId = event.target.getAttribute('data-user-id');
+                const currentStatus = event.target.getAttribute('data-current-status');
+                openStatusModal(userId, currentStatus);
+            }
+        });
+    </script>
+</body>
+</html>

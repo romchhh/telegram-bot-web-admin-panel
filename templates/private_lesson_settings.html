@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка сообщения "Приватный урок"</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        
+        .inline-buttons-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        .inline-buttons-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .button-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        
+        .button-row input {
+            flex: 1;
+        }
+        
+        .button-row .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .preview-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        .preview-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .preview-content {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .help-text {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        .breadcrumb {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎓 Настройка сообщения "Приватный урок"</h1>
+        <div class="nav-buttons">
+            <a href="{{ url_for('admin_panel') }}" class="nav-btn">🏠 Главная</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_panel') }}">🏠 Главная</a> → 🎓 Приватный урок
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <h2>📝 Настройка сообщения "Приватный урок"</h2>
+            <form method="POST" action="/save_private_lesson_settings">
+                <div class="form-group">
+                    <label for="message">Текст сообщения:</label>
+                    <textarea id="message" name="message" class="form-control" rows="6" required>{{ private_lesson_config.message }}</textarea>
+                    <div class="help-text">Поддерживается HTML разметка</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="media_type">Тип медиа:</label>
+                    <select id="media_type" name="media_type" class="form-select" onchange="toggleMediaUrl()">
+                        <option value="none" {{ 'selected' if private_lesson_config.media_type == 'none' }}>Без медиа</option>
+                        <option value="photo" {{ 'selected' if private_lesson_config.media_type == 'photo' }}>Фото</option>
+                        <option value="video" {{ 'selected' if private_lesson_config.media_type == 'video' }}>Видео</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="media_url_group" style="display: none;">
+                    <label for="media_url">URL медиа:</label>
+                    <input type="text" id="media_url" name="media_url" class="form-control" value="{{ private_lesson_config.media_url }}" placeholder="https://example.com/image.jpg">
+                    <div class="help-text">Введите URL изображения или видео, либо file_id от Telegram</div>
+                </div>
+
+                <!-- <div class="inline-buttons-section">
+                    <h3>🔘 Инлайн кнопки</h3>
+                    <div id="inline_buttons_container">
+                        {% for button in private_lesson_config.inline_buttons %}
+                        <div class="button-row">
+                            <input type="text" name="button_text[]" class="form-control" placeholder="Текст кнопки" value="{{ button.text }}" maxlength="64">
+                            <input type="text" name="button_link[]" class="form-control" placeholder="Ссылка" value="{{ button.url }}" maxlength="2048">
+                            <button type="button" class="btn btn-danger" onclick="removeButton(this)">🗑️</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addButton()">➕ Добавить кнопку</button>
+                    <div class="help-text">Максимум 8 кнопок (ограничение Telegram)</div>
+                </div> -->
+
+                <div class="preview-section">
+                    <h3>👁️ Предварительный просмотр</h3>
+                    <div class="preview-content" id="preview">
+                        <div id="preview_text">{{ private_lesson_config.message }}</div>
+                        {% if private_lesson_config.media_type != 'none' and private_lesson_config.media_url %}
+                            <div id="preview_media" style="margin-top: 1rem;">
+                                {% if private_lesson_config.media_type == 'photo' %}
+                                    <img src="{{ private_lesson_config.media_url }}" alt="Preview" style="max-width: 100%; border-radius: 8px;">
+                                {% elif private_lesson_config.media_type == 'video' %}
+                                    <video controls style="max-width: 100%; border-radius: 8px;">
+                                        <source src="{{ private_lesson_config.media_url }}" type="video/mp4">
+                                        Ваш браузер не поддерживает видео.
+                                    </video>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        {% if private_lesson_config.inline_buttons %}
+                            <div id="preview_buttons" style="margin-top: 1rem;">
+                                {% for button in private_lesson_config.inline_buttons %}
+                                    <a href="{{ button.url }}" class="btn" style="margin-right: 0.5rem; margin-bottom: 0.5rem;">{{ button.text }}</a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-success">💾 Сохранить настройки</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleMediaUrl() {
+            const mediaType = document.getElementById('media_type').value;
+            const mediaUrlGroup = document.getElementById('media_url_group');
+            
+            if (mediaType === 'none') {
+                mediaUrlGroup.style.display = 'none';
+            } else {
+                mediaUrlGroup.style.display = 'block';
+            }
+        }
+
+        function addButton() {
+            const container = document.getElementById('inline_buttons_container');
+            const buttonRow = document.createElement('div');
+            buttonRow.className = 'button-row';
+            buttonRow.innerHTML = `
+                <input type="text" name="button_text[]" class="form-control" placeholder="Текст кнопки" maxlength="64">
+                <input type="text" name="button_link[]" class="form-control" placeholder="Ссылка" maxlength="2048">
+                <button type="button" class="btn btn-danger" onclick="removeButton(this)">🗑️</button>
+            `;
+            container.appendChild(buttonRow);
+        }
+
+        function removeButton(button) {
+            button.parentElement.remove();
+        }
+
+        // Ініціалізація при завантаженні сторінки
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleMediaUrl();
+        });
+    </script>
+</body>
+</html>

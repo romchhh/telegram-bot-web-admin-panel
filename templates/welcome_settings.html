@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Настройка приветственного сообщения</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="url"],
+        .form-group input[type="email"],
+        .form-group input[type="password"],
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input[type="text"]:focus,
+        .form-group input[type="url"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group input[type="password"]:focus,
+        .form-group input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group select option {
+            padding: 0.5rem;
+        }
+        
+        .form-group small {
+            display: block;
+            margin-top: 0.5rem;
+            color: #6c757d;
+            font-size: 0.875rem;
+            font-style: italic;
+        }
+        
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .current-message {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .current-message strong {
+            color: #495057;
+        }
+        
+        .flash-messages {
+            margin-bottom: 1rem;
+        }
+        
+        .flash-message {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .flash-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .flash-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .html-help {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .html-help h4 {
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+        
+        .html-help code {
+            background: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .media-preview {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .media-preview img,
+        .media-preview video {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+        
+        .breadcrumb {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .buttons-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .buttons-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        #buttons-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #f8f9fa;
+        }
+        
+        .button-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+        
+        .button-row input[type="text"] {
+            flex: 2;
+        }
+        
+        .button-row input[type="url"] {
+            flex: 3;
+        }
+        
+        .add-button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .add-button:hover {
+            transform: translateY(-1px);
+        }
+        
+        .cleanup-btn {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .cleanup-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .db-cleanup-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .db-cleanup-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .remove-button {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .remove-button:hover {
+            transform: translateY(-1px);
+        }
+        
+        .welcome-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 1rem;
+        }
+        
+        .tab-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            color: #6c757d;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .tab-content h3 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👋 Настройки стартового сообщения</h1>
+        <div class="nav-buttons">
+            <a href="{{ url_for('admin_panel') }}" class="nav-btn">🏠 Главная</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_panel') }}">🏠 Главная</a> → 👋 Приветственное сообщение
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="card">
+            <h2>✏️ Редактирование приветственных сообщений</h2>
+            
+            <div class="welcome-tabs">
+                <button type="button" class="tab-btn active" onclick="showTab('with_subscription')">
+                    ✅ С подпиской
+                </button>
+                <button type="button" class="tab-btn" onclick="showTab('without_subscription')">
+                    🚫 Без подписки
+                </button>
+            </div>
+            
+            <!-- Вкладка с подпиской -->
+            <div id="with_subscription_tab" class="tab-content active">
+                <h3>👋 Стартовое сообщение с подпиской</h3>
+            
+            <div class="current-message">
+                <strong>Текущее сообщение:</strong><br>
+                {{ settings.start_message }}
+                {% if settings.start_media_type != "none" %}
+                    <br><br><strong>Медиа:</strong> {{ settings.start_media_type }} - {{ settings.start_media_url }}
+                {% endif %}
+                
+                {% if inline_buttons and inline_buttons|length > 0 %}
+                    <br><br><strong>Инлайн кнопки:</strong><br>
+                    {% set valid_buttons = [] %}
+                    {% for button in inline_buttons %}
+                        {% if button.text and button.url and button.text.strip() and button.url.strip() %}
+                            {% set _ = valid_buttons.append(button) %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if valid_buttons %}
+                        {% for button in valid_buttons %}
+                            • {{ button.text }} → {{ button.url }}<br>
+                        {% endfor %}
+                        <br><strong>Позиция:</strong> 
+                        {% if settings.start_inline_buttons_position == "above" %}
+                            🔼 Над основными кнопками
+                        {% else %}
+                            🔽 Под основными кнопками
+                        {% endif %}
+                    {% else %}
+                        <em>Нет добавленных кнопок (все кнопки пустые или невалидны)</em>
+                    {% endif %}
+                {% else %}
+                    <em>Нет данных</em>
+                {% endif %}
+                
+                <br><br><strong>Основные кнопки:</strong><br>
+                • {{ settings.start_answers_button_text or '💡 Ответи' }} (callback: answers)<br>
+                • {{ settings.start_our_chat_button_text or '🎓 Приватный урок' }} (callback: our_chat)<br>
+                • {{ settings.start_shop_button_text or '💰 Тарифы' }} (callback: shop)
+            </div>
+            
+            <form method="POST" action="{{ url_for('edit_start_message') }}" onsubmit="return validateForm()">
+                <div class="form-group">
+                    <label for="start_message">Стартовое сообщение (HTML поддерживается):</label>
+                    <textarea 
+                        id="start_message" 
+                        name="start_message" 
+                        placeholder="Введите новое стартовое сообщение..."
+                        required
+                    >{{ settings.start_message }}</textarea>
+                </div>
+                
+                <div class="html-help">
+                    <h4>💡 HTML теги для форматирования:</h4>
+                    <p><code>&lt;b&gt;жирный текст&lt;/b&gt;</code> - <b>жирный текст</b></p>
+                    <p><code>&lt;i&gt;курсив&lt;/i&gt;</code> - <i>курсив</i></p>
+                    <p><code>&lt;u&gt;подчеркнутый&lt;/u&gt;</code> - <u>подчеркнутый</u></p>
+                    <p><code>&lt;s&gt;зачеркнутый&lt;/s&gt;</code> - <s>зачеркнутый</s></p>
+                    <p><code>&lt;code&gt;код&lt;/code&gt;</code> - <code>код</code></p>
+                    <p><code>&lt;pre&gt;блок кода&lt;/pre&gt;</code></p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="media_type">Тип медиа:</label>
+                    <select id="media_type" name="media_type" onchange="toggleMediaFields()">
+                        <option value="none" {% if settings.start_media_type == "none" %}selected{% endif %}>Без медиа</option>
+                        <option value="photo" {% if settings.start_media_type == "photo" %}selected{% endif %}>Фото</option>
+                        <option value="video" {% if settings.start_media_type == "video" %}selected{% endif %}>Видео</option>
+                    </select>
+                    <small>Выберите тип медиа файла для отображения</small>
+                </div>
+                
+                <div class="form-group" id="media_url_group" style="display: none;">
+                    <label for="media_url">URL медиа файла или ID:</label>
+                    <input type="text" id="media_url" name="media_url" 
+                           placeholder="https://example.com/image.jpg или file_id" 
+                           value="{{ settings.start_media_url }}">
+                    <small>Можете указать URL файла (https://example.com/image.jpg) или ID файла (полученный через команду /get_media_id)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="answers_button_text">Текст кнопки "Ответи":</label>
+                    <input type="text" id="answers_button_text" name="answers_button_text" 
+                           placeholder="💡 Ответи" 
+                           value="{{ settings.start_answers_button_text or '💡 Ответи' }}" maxlength="64">
+                </div>
+                
+                <div class="form-group">
+                    <label for="our_chat_button_text">Текст кнопки "Приватный урок":</label>
+                    <input type="text" id="our_chat_button_text" name="our_chat_button_text" 
+                           placeholder="🎓 Приватный урок" 
+                           value="{{ settings.start_our_chat_button_text or '🎓 Приватный урок' }}" maxlength="64">
+                </div>
+                
+                <div class="form-group">
+                    <label for="shop_button_text">Текст кнопки "Тарифы":</label>
+                    <input type="text" id="shop_button_text" name="shop_button_text" 
+                           placeholder="💰 Тарифы" 
+                           value="{{ settings.start_shop_button_text or '💰 Тарифы' }}" maxlength="64">
+                </div>
+                
+                <div class="buttons-section">
+                    <h3>📱 Инлайн кнопки</h3>
+                    
+                    <div class="form-group">
+                        <label for="inline_buttons_position">Позиция инлайн кнопок:</label>
+                        <select id="inline_buttons_position" name="inline_buttons_position" onchange="updateButtonsPreview()">
+                                                    <option value="above" {% if settings.start_inline_buttons_position == "above" %}selected{% endif %}>🔼 Над основными кнопками (Ответи, Приватный урок, Тарифы)</option>
+                        <option value="below" {% if settings.start_inline_buttons_position == "below" %}selected{% endif %}>🔽 Под основными кнопками (Ответи, Приватный урок, Тарифы)</option>
+                        </select>
+                        <small>Выберите, где будут расположены инлайн кнопки относительно основных кнопок</small>
+                    </div>
+                    
+                    <div id="buttons-container">
+                        
+                        {% set inline_buttons = [] %}
+                        {% if settings.start_inline_buttons %}
+                            {% if settings.start_inline_buttons is string %}
+                                {% if settings.start_inline_buttons != '[]' %}
+                                    {% set inline_buttons = settings.start_inline_buttons|from_json %}
+                                    {% if inline_buttons %}
+                                        {% set valid_buttons = [] %}
+                                        {% for button in inline_buttons %}
+                                            {% if button.text and button.url and button.text.strip() and button.url.strip() %}
+                                                {% set _ = valid_buttons.append(button) %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        {% if valid_buttons %}
+                                            {% for button in valid_buttons %}
+                                                <div class="button-row">
+                                                    <input type="text" name="button_text[]" placeholder="Текст кнопки" value="{{ button.text }}" maxlength="64">
+                                                    <input type="url" name="button_link[]" placeholder="Ссылка" value="{{ button.url }}" maxlength="2048">
+                                                    <button type="button" class="remove-button" onclick="removeButton(this)">Удалить</button>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="button-row">
+                                                <input type="text" name="button_text[]" placeholder="Текст кнопки" maxlength="64">
+                                                <input type="url" name="button_link[]" placeholder="Ссылка" maxlength="2048">
+                                                <button type="button" class="remove-button" onclick="removeButton(this)" style="display: none;">Удалить</button>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="button-row">
+                                            <input type="text" name="button_text[]" placeholder="Текст кнопки" maxlength="64">
+                                            <input type="url" name="button_link[]" placeholder="Ссылка" maxlength="2048">
+                                            <button type="button" class="remove-button" onclick="removeButton(this)" style="display: none;">Удалить</button>
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="button-row">
+                                        <input type="text" name="button_text[]" placeholder="Текст кнопки" maxlength="64">
+                                        <input type="url" name="button_link[]" placeholder="Ссылка" maxlength="2048">
+                                        <button type="button" class="remove-button" onclick="removeButton(this)" style="display: none;">Удалить</button>
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                {% if settings.start_inline_buttons|length > 0 %}
+                                    {% set valid_buttons = [] %}
+                                    {% for button in settings.start_inline_buttons %}
+                                        {% if button.text and button.url and button.text.strip() and button.url.strip() %}
+                                            {% set _ = valid_buttons.append(button) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if valid_buttons %}
+                                        {% for button in valid_buttons %}
+                                            <div class="button-row">
+                                                <input type="text" name="button_text[]" placeholder="Текст кнопки" value="{{ button.text }}" maxlength="64">
+                                                <input type="url" name="button_link[]" placeholder="Ссылка" value="{{ button.url }}" maxlength="2048">
+                                                <button type="button" class="remove-button" onclick="removeButton(this)">Удалить</button>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="button-row">
+                                            <input type="text" name="button_text[]" placeholder="Текст кнопки" maxlength="64">
+                                            <input type="url" name="button_link[]" placeholder="Ссылка" maxlength="2048">
+                                            <button type="button" class="remove-button" onclick="removeButton(this)" style="display: none;">Удалить</button>
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="button-row">
+                                        <input type="text" name="button_text[]" placeholder="Текст кнопки" maxlength="64">
+                                        <input type="url" name="button_link[]" placeholder="Ссылка" maxlength="2048">
+                                        <button type="button" class="remove-button" onclick="removeButton(this)" style="display: none;">Удалить</button>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <div class="button-row">
+                                <input type="text" name="button_text[]" placeholder="Текст кнопки" maxlength="64">
+                                <input type="url" name="button_link[]" placeholder="Ссылка" maxlength="2048">
+                                <button type="button" class="remove-button" onclick="removeButton(this)" style="display: none;">Удалить</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="add-button" onclick="addButton()">+ Добавить кнопку</button>
+                </div>
+                
+                <div id="media_preview" class="media-preview" style="display: none;">
+                    <strong>Предварительный просмотр:</strong>
+                    <div id="preview_content"></div>
+                </div>
+                
+                <button type="submit" class="save-btn">💾 Сохранить изменения</button>
+            </form>
+            </div> <!-- Закриваємо вкладку з підпискою -->
+            
+            <!-- Вкладка без подписки -->
+            <div id="without_subscription_tab" class="tab-content">
+                <h3>🚫 Приветственное сообщение без подписки</h3>
+                
+                <div class="current-message">
+                    <strong>Текущее сообщение:</strong><br>
+                    {{ welcome_without_subscription.message_text if welcome_without_subscription else 'Не настроено' }}
+                    {% if welcome_without_subscription and welcome_without_subscription.media_type != "none" %}
+                        <br><br><strong>Медиа:</strong> {{ welcome_without_subscription.media_type }} - {{ welcome_without_subscription.media_url }}
+                    {% endif %}
+                    {% if welcome_without_subscription and welcome_without_subscription.channel_url %}
+                        <br><br><strong>Канал:</strong> {{ welcome_without_subscription.channel_url }} ({{ welcome_without_subscription.channel_id }})
+                        <br><strong>Текст кнопки:</strong> {{ welcome_without_subscription.channel_button_text }}
+                    {% endif %}
+                </div>
+                
+                <form method="POST" action="{{ url_for('save_welcome_without_subscription_route') }}" onsubmit="return validateFormWithoutSubscription()">
+                    <div class="form-group">
+                        <label for="message_text_without">Текст сообщения (HTML поддерживается):</label>
+                        <textarea 
+                            id="message_text_without" 
+                            name="message_text" 
+                            placeholder="Введите текст сообщения для пользователей без подписки..."
+                            required
+                        >{{ welcome_without_subscription.message_text if welcome_without_subscription else '' }}</textarea>
+                    </div>
+                    
+                    <div class="html-help">
+                        <h4>💡 HTML теги для форматирования:</h4>
+                        <p><code>&lt;b&gt;жирный текст&lt;/b&gt;</code> - <b>жирный текст</b></p>
+                        <p><code>&lt;i&gt;курсив&lt;/i&gt;</code> - <i>курсив</i></p>
+                        <p><code>&lt;u&gt;подчеркнутый&lt;/u&gt;</code> - <u>подчеркнутый</u></p>
+                        <p><code>&lt;s&gt;зачеркнутый&lt;/s&gt;</code> - <s>зачеркнутый</s></p>
+                        <p><code>&lt;code&gt;код&lt;/code&gt;</code> - <code>код</code></p>
+                        <p><code>&lt;pre&gt;блок кода&lt;/pre&gt;</code></p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="media_type_without">Тип медиа:</label>
+                        <select id="media_type_without" name="media_type" onchange="toggleMediaFieldsWithout()">
+                            <option value="none" {% if not welcome_without_subscription or welcome_without_subscription.media_type == "none" %}selected{% endif %}>Без медиа</option>
+                            <option value="photo" {% if not welcome_without_subscription or welcome_without_subscription.media_type == "photo" %}selected{% endif %}>Фото</option>
+                            <option value="video" {% if not welcome_without_subscription or welcome_without_subscription.media_type == "video" %}selected{% endif %}>Видео</option>
+                        </select>
+                        <small>Выберите тип медиа файла для отображения</small>
+                    </div>
+                    
+                    <div class="form-group" id="media_url_group_without" style="display: none;">
+                        <label for="media_url_without">URL медиа файла или ID:</label>
+                        <input type="text" id="media_url_without" name="media_url" 
+                               placeholder="https://example.com/image.jpg или file_id" 
+                               value="{{ welcome_without_subscription.media_url if welcome_without_subscription else '' }}">
+                        <small>Можете указать URL файла (https://example.com/image.jpg) или ID файла (полученный через команду /get_media_id)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="channel_url">Ссылка на канал:</label>
+                        <input type="url" id="channel_url" name="channel_url" 
+                               placeholder="https://t.me/your_channel" 
+                               value="{{ welcome_without_subscription.channel_url if welcome_without_subscription else '' }}" required>
+                        <small>Ссылка на канал для перехода пользователя</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="channel_id">ID канала:</label>
+                        <input type="text" id="channel_id" name="channel_id" 
+                               placeholder="@your_channel или -1001234567890" 
+                               value="{{ welcome_without_subscription.channel_id if welcome_without_subscription else '' }}" required>
+                        <small>Можно использовать username (@channel) или числовой ID</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="channel_button_text">Текст кнопки подписки на канал:</label>
+                        <input type="text" id="channel_button_text" name="channel_button_text" 
+                               placeholder="📢 Подписаться на канал" 
+                               value="{{ welcome_without_subscription.channel_button_text if welcome_without_subscription else '📢 Подписаться на канал' }}" required>
+                        <small>Текст, который будет отображаться на кнопке для перехода на канал</small>
+                    </div>
+                    
+                    <div id="media_preview_without" class="media-preview" style="display: none;">
+                        <strong>Предварительный просмотр:</strong>
+                        <div id="preview_content_without"></div>
+                    </div>
+                    
+                    <button type="submit" class="save-btn">💾 Сохранить изменения</button>
+                </form>
+            </div> <!-- Закриваємо вкладку без підписки -->
+        </div>
+        
+        <div class="card">
+            <h2>ℹ️ Информация</h2>
+            <p>Здесь вы можете редактировать оба типа приветственных сообщений:</p>
+            
+            <h3>✅ С подпиской (стартовое сообщение)</h3>
+            <p>Сообщение, которое бот отправляет пользователям при команде /start, если они уже подписаны на канал.</p>
+            <ul>
+                <li><strong>HTML форматирование:</strong> Поддерживаются базовые HTML теги для стилизации текста</li>
+                <li><strong>Медиа файлы:</strong> Можно добавить фото или видео с URL файла или использовать ID файла</li>
+                <li><strong>Инлайн кнопки:</strong> Максимум 8 кнопок (ограничение Telegram)</li>
+                <li><strong>Основные кнопки:</strong> "Ответи", "Приватный урок" и "Тарифы"</li>
+            </ul>
+            
+            <h3>🚫 Без подписки</h3>
+            <p>Сообщение, которое показывается пользователям, которые еще не подписались на канал.</p>
+            <ul>
+                <li><strong>HTML форматирование:</strong> Поддерживаются базовые HTML теги</li>
+                <li><strong>Медиа файлы:</strong> Фото или видео (можно использовать URL файла или ID файла)</li>
+                <li><strong>Посилання на канал:</strong> Для переходу користувача</li>
+                <li><strong>ID каналу:</strong> Для перевірки підписки</li>
+                <li><strong>Текст кнопки:</strong> Настраиваемый текст кнопки для перехода на канал</li>
+            </ul>
+            <p><strong>Принцип работы:</strong> Пользователь видит сообщение с кнопкой для подписки на канал. После подписки он может использовать команду /start для доступа к боту.</p>
+            
+            <p><strong>Важливо:</strong> Зміни застосовуються миттєво та зберігаються в SQLite базі даних.</p>
+        </div>
+    </div>
+    
+    <script>
+        function toggleMediaFields() {
+            const mediaType = document.getElementById('media_type').value;
+            const mediaUrlGroup = document.getElementById('media_url_group');
+            const mediaPreview = document.getElementById('media_preview');
+            
+            console.log('Toggling media fields, media type:', mediaType);
+            
+            if (mediaType === 'none') {
+                mediaUrlGroup.style.display = 'none';
+                mediaPreview.style.display = 'none';
+            } else {
+                mediaUrlGroup.style.display = 'block';
+                updateMediaPreview();
+            }
+        }
+        
+        function updateMediaPreview() {
+            const mediaType = document.getElementById('media_type').value;
+            const mediaUrl = document.getElementById('media_url').value;
+            const mediaPreview = document.getElementById('media_preview');
+            const previewContent = document.getElementById('preview_content');
+            
+            console.log('Updating media preview, media type:', mediaType, 'media URL:', mediaUrl);
+            
+            if (mediaType !== 'none' && mediaUrl) {
+                mediaPreview.style.display = 'block';
+                
+                if (mediaType === 'photo') {
+                    previewContent.innerHTML = `
+                        <img src="${mediaUrl}" alt="Предварительный просмотр фото" onerror="this.style.display='none'">
+                    `;
+                } else if (mediaType === 'video') {
+                    previewContent.innerHTML = `
+                        <video controls>
+                            <source src="${mediaUrl}" type="video/mp4">
+                            Ваш браузер не поддерживает видео.
+                        </video>
+                    `;
+                }
+            } else {
+                mediaPreview.style.display = 'none';
+            }
+        }
+        
+        function showTab(tabName) {
+            // Приховуємо всі вкладки
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            
+            // Деактивуємо всі кнопки
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+            
+            // Показуємо потрібну вкладку
+            document.getElementById(tabName + '_tab').classList.add('active');
+            
+            // Активуємо потрібну кнопку
+            event.target.classList.add('active');
+        }
+        
+        // Ініціалізація при завантаженні сторінки
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            
+            // Очищаємо порожні кнопки та обмежуємо кількість
+            cleanupEmptyButtons();
+            limitButtons();
+            
+            // Логуємо початковий стан кнопок
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            console.log('Initial button count after cleanup:', buttonRows.length);
+            
+            toggleMediaFields();
+            updateButtonsPreview(); // Оновлюємо попередній перегляд кнопок
+            
+            // Оновлення попереднього перегляду при зміні полів
+            document.getElementById('media_url').addEventListener('input', updateMediaPreview);
+            
+            // Додаємо обробники подій для автоматичного очищення
+            container.addEventListener('input', function(e) {
+                if (e.target.name === 'button_text[]' || e.target.name === 'button_link[]') {
+                    // Затримка для уникнення занадто частого виклику
+                    clearTimeout(window.cleanupTimeout);
+                    window.cleanupTimeout = setTimeout(cleanupEmptyButtons, 1000);
+                }
+            });
+            
+            console.log('Initialization complete');
+        });
+        
+        function addButton() {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            
+            console.log('Adding button, current count:', buttonRows.length);
+            
+            // Обмежуємо кількість кнопок до 8
+            if (buttonRows.length >= 8) {
+                alert('Максимальна кількість кнопок - 8 (обмеження Telegram)');
+                return;
+            }
+            
+            const buttonRow = document.createElement('div');
+            buttonRow.className = 'button-row';
+            
+            buttonRow.innerHTML = `
+                <input type="text" name="button_text[]" placeholder="Текст кнопки" maxlength="64">
+                <input type="url" name="button_link[]" placeholder="Ссылка" maxlength="2048">
+                <button type="button" class="remove-button" onclick="removeButton(this)">Удалить</button>
+            `;
+            
+            container.appendChild(buttonRow);
+            
+            // Оновлюємо видимість кнопок "Удалить"
+            updateRemoveButtonsVisibility();
+            
+            console.log('Button added, new count:', container.querySelectorAll('.button-row').length);
+        }
+        
+        function removeButton(button) {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            
+            console.log('Removing button, current count:', buttonRows.length);
+            
+            if (buttonRows.length > 1) {
+                const buttonRow = button.closest('.button-row');
+                if (buttonRow) {
+                    buttonRow.remove();
+                }
+                
+                // Оновлюємо видимість кнопок "Удалить"
+                updateRemoveButtonsVisibility();
+                
+                console.log('Button removed, new count:', container.querySelectorAll('.button-row').length);
+            }
+        }
+        
+        function validateForm() {
+            const buttonTexts = document.querySelectorAll('input[name="button_text[]"]');
+            const buttonLinks = document.querySelectorAll('input[name="button_link[]"]');
+            
+            console.log('Validating form, button count:', buttonTexts.length);
+            console.log('Button texts:', Array.from(buttonTexts).map(input => input.value));
+            console.log('Button links:', Array.from(buttonLinks).map(input => input.value));
+            
+            // Фільтруємо тільки заповнені кнопки
+            const validButtons = [];
+            for (let i = 0; i < buttonTexts.length; i++) {
+                const text = buttonTexts[i].value.trim();
+                const link = buttonLinks[i].value.trim();
+                
+                console.log(`Button ${i}: text="${text}", link="${link}"`);
+                
+                // Якщо заповнено тільки одне поле, показуємо помилку
+                if ((text && !link) || (!text && link)) {
+                    alert('Будь ласка, заповніть обидва поля для кнопки або залиште обидва порожніми');
+                    return false;
+                }
+                
+                // Якщо обидва поля заповнені, додаємо до валідних кнопок
+                if (text && link) {
+                    validButtons.push({ text, link });
+                }
+            }
+            
+            console.log('Valid buttons:', validButtons);
+            console.log('Form validation passed, submitting...');
+            
+            // Перевіряємо, чи не перевищуємо ліміт кнопок
+            if (validButtons.length > 8) {
+                alert('Максимальна кількість кнопок - 8 (обмеження Telegram)');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Функція для очищення порожніх кнопок
+        function cleanupEmptyButtons() {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            
+            console.log('Cleaning up empty buttons, current count:', buttonRows.length);
+            
+            // Видаляємо зайві порожні рядки кнопок, залишаючи тільки один
+            let emptyRows = 0;
+            let rowsToRemove = [];
+            let emptyRowFound = false;
+            
+            buttonRows.forEach((row, index) => {
+                const textInput = row.querySelector('input[name="button_text[]"]');
+                const linkInput = row.querySelector('input[name="button_link[]"]');
+                
+                if (textInput && linkInput) {
+                    const text = textInput.value.trim();
+                    const link = linkInput.value.trim();
+                    
+                    // Якщо рядок порожній і це не перший рядок
+                    if (!text && !link && index > 0) {
+                        // Якщо вже знайдено порожній рядок, видаляємо цей
+                        if (emptyRowFound) {
+                            rowsToRemove.push(row);
+                            emptyRows++;
+                        } else {
+                            emptyRowFound = true;
+                        }
+                    }
+                }
+            });
+            
+            // Видаляємо зайві порожні рядки
+            rowsToRemove.forEach(row => row.remove());
+            
+            console.log('Cleaned up empty buttons:', emptyRows);
+            
+            // Оновлюємо відображення кнопок "Удалить"
+            updateRemoveButtonsVisibility();
+            
+            // Обмежуємо кількість кнопок
+            limitButtons();
+        }
+        
+        // Функція для оновлення видимості кнопок "Удалить"
+        function updateRemoveButtonsVisibility() {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            const removeButtons = container.querySelectorAll('.remove-button');
+            
+            if (buttonRows.length === 1) {
+                removeButtons.forEach(btn => btn.style.display = 'none');
+            } else {
+                removeButtons.forEach(btn => btn.style.display = 'block');
+            }
+        }
+        
+        // Функція для обмеження кількості кнопок
+        function limitButtons() {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            
+            if (buttonRows.length > 8) {
+                // Видаляємо зайві кнопки, залишаючи тільки перші 8
+                for (let i = 8; i < buttonRows.length; i++) {
+                    buttonRows[i].remove();
+                }
+                console.log('Limited buttons to 8');
+            }
+        }
+        
+        // Функція для примусового очищення кнопок
+        function forceCleanup() {
+            if (confirm('Ви впевнені, що хочете очистити всі порожні кнопки? Це дію не можна скасувати.')) {
+                console.log('Force cleanup initiated');
+                
+                // Очищаємо порожні кнопки в інтерфейсі
+                cleanupEmptyButtons();
+                
+                // Показуємо повідомлення про успіх
+                showMessage('Порожні кнопки очищено!', 'success');
+                
+                // Оновлюємо сторінку через 1 секунду
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            }
+        }
+
+        // Функція для показу повідомлень
+        function showMessage(message, type = 'info') {
+            const flashContainer = document.querySelector('.flash-messages') || createFlashContainer();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flash-message ${type}`;
+            messageDiv.textContent = message;
+            
+            flashContainer.appendChild(messageDiv);
+            
+            // Автоматично видаляємо повідомлення через 5 секунд
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+        
+        // Функція для оновлення попереднього перегляду кнопок
+        function updateButtonsPreview() {
+            const positionSelect = document.getElementById('inline_buttons_position');
+            const position = positionSelect.value;
+            
+            // Оновлюємо текст під полем вибору позиції
+            const positionText = position === 'above' ? 
+                '🔼 Инлайн кнопки будут расположены НАД основными кнопками (Ответи, Приватный урок, Тарифы)' :
+                '🔽 Инлайн кнопки будут расположены ПОД основными кнопками (Ответи, Приватный урок, Тарифы)';
+            
+            // Знаходимо або створюємо елемент для відображення поточної позиції
+            let positionDisplay = document.querySelector('.position-display');
+            if (!positionDisplay) {
+                positionDisplay = document.createElement('div');
+                positionDisplay.className = 'position-display';
+                positionDisplay.style.cssText = 'margin-top: 0.5rem; padding: 0.5rem; background: #e3f2fd; border-radius: 4px; font-size: 0.9rem; color: #1976d2;';
+                positionSelect.parentNode.appendChild(positionDisplay);
+            }
+            
+            positionDisplay.textContent = positionText;
+        }
+        
+        // Функції для вкладки без підписки
+        function toggleMediaFieldsWithout() {
+            const mediaType = document.getElementById('media_type_without').value;
+            const mediaUrlGroup = document.getElementById('media_url_group_without');
+            const mediaPreview = document.getElementById('media_preview_without');
+            
+            if (mediaType === 'none') {
+                mediaUrlGroup.style.display = 'none';
+                mediaPreview.style.display = 'none';
+            } else {
+                mediaUrlGroup.style.display = 'block';
+                updateMediaPreviewWithout();
+            }
+        }
+        
+        function updateMediaPreviewWithout() {
+            const mediaType = document.getElementById('media_type_without').value;
+            const mediaUrl = document.getElementById('media_url_without').value;
+            const mediaPreview = document.getElementById('media_preview_without');
+            const previewContent = document.getElementById('preview_content_without');
+            
+            if (mediaType !== 'none' && mediaUrl) {
+                mediaPreview.style.display = 'block';
+                
+                if (mediaType === 'photo') {
+                    previewContent.innerHTML = `
+                        <img src="${mediaUrl}" alt="Попередній перегляд фото" onerror="this.style.display='none'">
+                    `;
+                } else if (mediaType === 'video') {
+                    previewContent.innerHTML = `
+                        <video controls>
+                            <source src="${mediaUrl}" type="video/mp4">
+                            Ваш браузер не підтримує відео.
+                        </video>
+                    `;
+                }
+            } else {
+                mediaPreview.style.display = 'none';
+            }
+        }
+        
+        function validateFormWithoutSubscription() {
+            const messageText = document.getElementById('message_text_without').value.trim();
+            const channelUrl = document.getElementById('channel_url').value.trim();
+            const channelId = document.getElementById('channel_id').value.trim();
+            
+            if (!messageText) {
+                alert('Будь ласка, введіть текст повідомлення');
+                return false;
+            }
+            
+            if (!channelUrl) {
+                alert('Будь ласка, введіть посилання на канал');
+                return false;
+            }
+            
+            if (!channelId) {
+                alert('Будь ласка, введіть ID каналу');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Функція для створення контейнера повідомлень
+        function createFlashContainer() {
+            const container = document.querySelector('.container');
+            const flashContainer = document.createElement('div');
+            flashContainer.className = 'flash-messages';
+            flashContainer.style.marginBottom = '1rem';
+            
+            // Вставляємо після breadcrumb
+            const breadcrumb = container.querySelector('.breadcrumb');
+            breadcrumb.parentNode.insertBefore(flashContainer, breadcrumb.nextSibling);
+            
+            return flashContainer;
+        }
+    </script>
+</body>
+</html>

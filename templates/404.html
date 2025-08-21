@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Страница не найдена</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .error-container {
+            text-align: center;
+            background: white;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            max-width: 500px;
+        }
+        
+        .error-code {
+            font-size: 6rem;
+            color: #667eea;
+            margin: 0;
+            font-weight: bold;
+        }
+        
+        .error-message {
+            font-size: 1.5rem;
+            color: #333;
+            margin: 1rem 0 2rem 0;
+        }
+        
+        .error-description {
+            color: #6c757d;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .back-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1 class="error-code">404</h1>
+        <h2 class="error-message">Страница не найдена</h2>
+        <p class="error-description">
+            Запрошенная страница не существует или была перемещена. 
+            Проверьте правильность URL или вернитесь на главную страницу.
+        </p>
+        <a href="/" class="back-btn">← Вернуться на главную</a>
+    </div>
+</body>
+</html>

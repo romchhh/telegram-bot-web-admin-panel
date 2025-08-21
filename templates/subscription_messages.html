@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сообщения после проверки подписки - Админ панель</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .breadcrumb {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .html-help {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .html-help h4 {
+            margin-bottom: 0.5rem;
+            color: #495057;
+        }
+        
+        .html-help ul {
+            margin-left: 1rem;
+        }
+        
+        .media-preview {
+            display: none;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        .media-preview img,
+        .media-preview video {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .add-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+        }
+        
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .current-settings {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .current-settings h3 {
+            color: #495057;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.5rem;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .setting-value {
+            color: #6c757d;
+            max-width: 300px;
+            word-break: break-word;
+        }
+        
+        .status-active {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-inactive {
+            color: #6c757d;
+            font-weight: bold;
+        }
+        
+        .buttons-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .buttons-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        #buttons-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #f8f9fa;
+        }
+        
+        .button-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+        
+        .button-row input[type="text"] {
+            flex: 2;
+        }
+        
+        .button-row input[type="url"] {
+            flex: 3;
+        }
+        
+        .add-button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .add-button:hover {
+            transform: translateY(-1px);
+        }
+        
+        .remove-button {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .remove-button:hover {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📱 Сообщения после проверки подписки</h1>
+        <div class="nav-buttons">
+            <a href="{{ url_for('admin_panel') }}" class="nav-btn">🏠 Главная</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_panel') }}">Главная</a> → Сообщения после проверки подписки
+        </div>
+
+        <div class="card">
+            <h2>⚙️ Настройка сообщения с инлайн кнопками</h2>
+            
+            <form method="POST" action="{{ url_for('save_subscription_message_route') }}" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="message_text">Текст сообщения:</label>
+                    <textarea id="message_text" name="message_text" placeholder="Введите текст сообщения..." required>{{ current_message.message_text if current_message else '' }}</textarea>
+                    <div class="html-help">
+                        <h4>💡 HTML теги для форматирования:</h4>
+                        <ul>
+                            <li><code>&lt;b&gt;</code> - <b>жирный текст</b></li>
+                            <li><code>&lt;i&gt;</code> - <i>курсив</i></li>
+                            <li><code>&lt;u&gt;</code> - <u>подчеркнутый текст</u></li>
+                            <li><code>&lt;s&gt;</code> - <s>зачеркнутый текст</s></li>
+                            <li><code>&lt;code&gt;</code> - <code>код</code></li>
+                            <li><code>&lt;pre&gt;</code> - блок кода</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="media_type">Тип медиа:</label>
+                    <select id="media_type" name="media_type" onchange="toggleMediaFields()">
+                        <option value="none" {% if not current_message or current_message.media_type == 'none' %}selected{% endif %}>Без медиа</option>
+                        <option value="photo" {% if current_message and current_message.media_type == 'photo' %}selected{% endif %}>Фото</option>
+                        <option value="video" {% if current_message and current_message.media_type == 'video' %}selected{% endif %}>Видео</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="media_url_group" style="display: none;">
+                    <label for="media_url">URL медиа:</label>
+                    <input type="url" id="media_url" name="media_url" placeholder="https://example.com/image.jpg" 
+                           value="{{ current_message.media_url if current_message else '' }}" onchange="updateMediaPreview()">
+                    <div class="media-preview" id="media_preview">
+                        <div id="preview_content"></div>
+                    </div>
+                </div>
+                
+                <!-- Приховане поле для передачі media_url тільки коли воно потрібне -->
+                <input type="hidden" id="media_url_hidden" name="media_url_hidden" value="">
+
+                <div class="buttons-section">
+                    <h3>📱 Inline кнопки</h3>
+                    
+                    <div class="form-group">
+                        <label for="inline_buttons_position">Позиция инлайн кнопок:</label>
+                        <select id="inline_buttons_position" name="inline_buttons_position" onchange="updateButtonsPreview()">
+                            <option value="below" {% if not current_message or current_message.inline_buttons_position == "below" %}selected{% endif %}>🔽 Под сообщением</option>
+                            <option value="above" {% if current_message and current_message.inline_buttons_position == "above" %}selected{% endif %}>🔼 Над сообщением</option>
+                        </select>
+                        <small>Выберите, где будут расположены инлайн кнопки</small>
+                    </div>
+                    
+                    <div id="buttons-container">
+                        {% if current_message and current_message.inline_buttons %}
+                            {% for button in current_message.inline_buttons %}
+                                <div class="button-row">
+                                    <input type="text" name="button_text[]" placeholder="Текст кнопки" value="{{ button.text }}" maxlength="64">
+                                    <input type="url" name="button_link[]" placeholder="Ссылка" value="{{ button.url }}" maxlength="2048">
+                                    <button type="button" class="remove-button" onclick="removeButton(this)">Удалить</button>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="button-row">
+                                <input type="text" name="button_text[]" placeholder="Текст кнопки" maxlength="64">
+                                <input type="url" name="button_link[]" placeholder="Ссылка" maxlength="2048">
+                                <button type="button" class="remove-button" onclick="removeButton(this)" style="display: none;">Удалить</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="add-button" onclick="addButton()">+ Добавить кнопку</button>
+                </div>
+
+                <button type="submit" class="add-btn">💾 Сохранить настройки</button>
+            </form>
+        </div>
+
+        {% if current_message %}
+        <div class="card">
+            <h2>📋 Текущие настройки</h2>
+            <div class="current-settings">
+                <div class="setting-item">
+                    <span class="setting-label">Текст сообщения:</span>
+                    <span class="setting-value">{{ current_message.message_text[:100] }}{% if current_message.message_text|length > 100 %}...{% endif %}</span>
+                </div>
+                
+                <div class="setting-item">
+                    <span class="setting-label">Позиция инлайн кнопок:</span>
+                    <span class="setting-value">
+                        {% if current_message.inline_buttons_position == "above" %}
+                            🔼 Над повідомленням
+                        {% else %}
+                            🔽 Під повідомленням
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="setting-item">
+                    <span class="setting-label">Тип медиа:</span>
+                    <span class="setting-value">
+                        {% if current_message.media_type == 'none' %}
+                            Без медиа
+                        {% elif current_message.media_type == 'photo' %}
+                            Фото
+                        {% elif current_message.media_type == 'video' %}
+                            Видео
+                        {% endif %}
+                    </span>
+                </div>
+                
+                {% if current_message.media_url %}
+                <div class="setting-item">
+                    <span class="setting-label">URL медиа:</span>
+                    <span class="setting-value">{{ current_message.media_url[:50] }}...</span>
+                </div>
+                {% endif %}
+                
+                {% if current_message.inline_buttons and current_message.inline_buttons|length > 0 %}
+                <div class="setting-item">
+                    <span class="setting-label">Інлайн кнопки:</span>
+                    <span class="setting-value">
+                        {% for button in current_message.inline_buttons %}
+                            <br>• {{ button.text }} → {{ button.url[:30] }}{% if button.url|length > 30 %}...{% endif %}
+                        {% endfor %}
+                        <br><br><strong>Позиція:</strong> 
+                        {% if current_message.inline_buttons_position == "above" %}
+                            🔼 Над повідомленням
+                        {% else %}
+                            🔽 Під повідомленням
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+                
+                <div class="setting-item">
+                    <span class="setting-label">Статус:</span>
+                    <span class="setting-value">
+                        {% if current_message.is_active %}
+                            <span class="status-active">✅ Активно</span>
+                        {% else %}
+                            <span class="status-inactive">📝 Неактивно</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <h2>ℹ️ О сообщениях после проверки подписки</h2>
+            <p>Это сообщение будет автоматически отправляться пользователям после успешной проверки их подписки на ваш канал.</p>
+            <p><strong>Інлайн кнопки:</strong> Можна додати до 8 кнопок з посиланнями (обмеження Telegram). Кнопки можуть розташовуватися над або під повідомленням.</p>
+            <p><strong>Важно:</strong> Все настройки сохраняются в базе данных и используются ботом для автоматической отправки.</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleMediaFields() {
+            const mediaType = document.getElementById('media_type').value;
+            const mediaUrlGroup = document.getElementById('media_url_group');
+            const mediaPreview = document.getElementById('media_preview');
+            const mediaUrl = document.getElementById('media_url');
+            const mediaUrlHidden = document.getElementById('media_url_hidden');
+            
+            if (mediaType === 'none') {
+                mediaUrlGroup.style.display = 'none';
+                mediaPreview.style.display = 'none';
+                // Очищаємо поле URL медіа коли вибирається "Без медиа"
+                mediaUrl.value = '';
+                mediaUrlHidden.value = '';
+            } else {
+                mediaUrlGroup.style.display = 'block';
+                updateMediaPreview();
+            }
+        }
+        
+        function updateMediaPreview() {
+            const mediaType = document.getElementById('media_type').value;
+            const mediaUrl = document.getElementById('media_url').value;
+            const mediaPreview = document.getElementById('media_preview');
+            const previewContent = document.getElementById('preview_content');
+            const mediaUrlHidden = document.getElementById('media_url_hidden');
+            
+            // Оновлюємо приховане поле
+            mediaUrlHidden.value = mediaUrl;
+            
+            if (mediaType !== 'none' && mediaUrl) {
+                mediaPreview.style.display = 'block';
+                
+                if (mediaType === 'photo') {
+                    previewContent.innerHTML = `
+                        <img src="${mediaUrl}" alt="Предварительный просмотр фото" onerror="this.style.display='none'">
+                    `;
+                } else if (mediaType === 'video') {
+                    previewContent.innerHTML = `
+                        <video controls>
+                            <source src="${mediaUrl}" type="video/mp4">
+                            Ваш браузер не поддерживает видео.
+                        </video>
+                    `;
+                }
+            } else {
+                mediaPreview.style.display = 'none';
+            }
+        }
+        
+        // Ініціалізація при завантаженні сторінки
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleMediaFields();
+            updateMediaPreview();
+            
+            // Очищаємо порожні кнопки та обмежуємо кількість
+            cleanupEmptyButtons();
+            limitButtons();
+            
+            // Оновлюємо видимість кнопок "Удалить"
+            updateRemoveButtonsVisibility();
+            
+            // Додаємо обробники подій для автоматичного очищення
+            const container = document.getElementById('buttons-container');
+            container.addEventListener('input', function(e) {
+                if (e.target.name === 'button_text[]' || e.target.name === 'button_link[]') {
+                    // Затримка для уникнення занадто частого виклику
+                    clearTimeout(window.cleanupTimeout);
+                    window.cleanupTimeout = setTimeout(cleanupEmptyButtons, 1000);
+                }
+            });
+        });
+        
+        function addButton() {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            
+            // Обмежуємо кількість кнопок до 8
+            if (buttonRows.length >= 8) {
+                alert('Максимальна кількість кнопок - 8 (обмеження Telegram)');
+                return;
+            }
+            
+            const buttonRow = document.createElement('div');
+            buttonRow.className = 'button-row';
+            
+            buttonRow.innerHTML = `
+                <input type="text" name="button_text[]" placeholder="Текст кнопки" maxlength="64">
+                <input type="url" name="button_link[]" placeholder="Ссылка" maxlength="2048">
+                <button type="button" class="remove-button" onclick="removeButton(this)">Удалить</button>
+            `;
+            
+            container.appendChild(buttonRow);
+            
+            // Оновлюємо видимість кнопок "Удалить"
+            updateRemoveButtonsVisibility();
+        }
+        
+        function removeButton(button) {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            
+            if (buttonRows.length > 1) {
+                const buttonRow = button.closest('.button-row');
+                if (buttonRow) {
+                    buttonRow.remove();
+                }
+                
+                // Оновлюємо видимість кнопок "Удалить"
+                updateRemoveButtonsVisibility();
+            }
+        }
+        
+        // Функція для очищення порожніх кнопок
+        function cleanupEmptyButtons() {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            
+            // Видаляємо зайві порожні рядки кнопок, залишаючи тільки один
+            let emptyRows = 0;
+            let rowsToRemove = [];
+            let emptyRowFound = false;
+            
+            buttonRows.forEach((row, index) => {
+                const textInput = row.querySelector('input[name="button_text[]"]');
+                const linkInput = row.querySelector('input[name="button_link[]"]');
+                
+                if (textInput && linkInput) {
+                    const text = textInput.value.trim();
+                    const link = linkInput.value.trim();
+                    
+                    // Якщо рядок порожній і це не перший рядок
+                    if (!text && !link && index > 0) {
+                        // Якщо вже знайдено порожній рядок, видаляємо цей
+                        if (emptyRowFound) {
+                            rowsToRemove.push(row);
+                            emptyRows++;
+                        } else {
+                            emptyRowFound = true;
+                        }
+                    }
+                }
+            });
+            
+            // Видаляємо зайві порожні рядки
+            rowsToRemove.forEach(row => row.remove());
+            
+            // Оновлюємо відображення кнопок "Удалить"
+            updateRemoveButtonsVisibility();
+            
+            // Обмежуємо кількість кнопок
+            limitButtons();
+        }
+        
+        // Функція для оновлення видимості кнопок "Удалить"
+        function updateRemoveButtonsVisibility() {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            const removeButtons = container.querySelectorAll('.remove-button');
+            
+            if (buttonRows.length === 1) {
+                removeButtons.forEach(btn => btn.style.display = 'none');
+            } else {
+                removeButtons.forEach(btn => btn.style.display = 'block');
+            }
+        }
+        
+        // Функція для обмеження кількості кнопок
+        function limitButtons() {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            
+            if (buttonRows.length > 8) {
+                // Видаляємо зайві кнопки, залишаючи тільки перші 8
+                for (let i = 8; i < buttonRows.length; i++) {
+                    buttonRows[i].remove();
+                }
+            }
+        }
+        
+        function updateButtonsPreview() {
+            const positionSelect = document.getElementById('inline_buttons_position');
+            const position = positionSelect.value;
+            
+            // Оновлюємо текст під полем вибору позиції
+            const positionText = position === 'above' ? 
+                '🔼 Інлайн кнопки будуть розташовані НАД повідомленням' :
+                '🔽 Інлайн кнопки будуть розташовані ПІД повідомленням';
+            
+            // Знаходимо або створюємо елемент для відображення поточної позиції
+            let positionDisplay = document.querySelector('.position-display');
+            if (!positionDisplay) {
+                positionDisplay = document.createElement('div');
+                positionDisplay.className = 'position-display';
+                positionDisplay.style.cssText = 'margin-top: 0.5rem; padding: 0.5rem; background: #e3f2fd; border-radius: 4px; font-size: 0.9rem; color: #1976d2;';
+                positionSelect.parentNode.appendChild(positionDisplay);
+            }
+            
+            positionDisplay.textContent = positionText;
+        }
+    </script>
+</body>
+</html>

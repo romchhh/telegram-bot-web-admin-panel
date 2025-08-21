@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка капчи "Я не робот"</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .breadcrumb {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .media-preview {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .media-preview img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+        }
+        
+        .media-preview video {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+        }
+        
+        .captcha-info {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .captcha-info h3 {
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+        
+        .captcha-info p {
+            color: #1565c0;
+            margin-bottom: 0.5rem;
+        }
+        
+        .captcha-info ul {
+            color: #1565c0;
+            margin-left: 1.5rem;
+        }
+        
+        .flash-messages {
+            margin-bottom: 1rem;
+        }
+        
+        .flash-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+        
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .html-help {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .html-help h4 {
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        .html-help p {
+            margin-bottom: 0.5rem;
+            color: #6c757d;
+        }
+        
+        .html-help code {
+            background: #e9ecef;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .show {
+            display: block;
+        }
+        
+        .hide {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 Настройка капчи "Я не робот"</h1>
+        <div class="nav-buttons">
+            <a href="{{ url_for('admin_panel') }}" class="nav-btn">🏠 Главная</a>
+            <a href="{{ url_for('channel_join_settings') }}" class="nav-btn">🔗 Пригласительные ссылки</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">🚪 Выйти</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_panel') }}">Главная</a> &gt; 
+            <a href="{{ url_for('channel_join_settings') }}">Пригласительные ссылки</a> &gt; 
+            Настройка капчи
+        </div>
+        
+        <!-- Flash сообщения -->
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+        <div class="card">
+            <h2>ℹ️ Информация о капче</h2>
+            <div class="captcha-info">
+                <h3>Как работает капча "Я не робот"</h3>
+                <p>Когда пользователь подает заявку на вступ в канал:</p>
+                <ul>
+                    <li>Бот автоматически отправляет ему сообщение с капчей</li>
+                    <li>Пользователь должен нажать кнопку "Я не робот"</li>
+                    <li>После нажатия кнопка исчезает и пользователь получает доступ</li>
+                    <li>Бот автоматически принимает заявку на вступ в канал</li>
+                </ul>
+                <p><strong>Важно:</strong> Капча настраивается один раз и применяется ко всем пригласительным ссылкам.</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>🤖 Настройка глобальной капчи</h2>
+            <form method="POST" action="{{ url_for('save_captcha_settings_route') }}" class="captcha-form">
+                <div class="form-group">
+                    <label for="captcha_message">Текст капчи:</label>
+                    <textarea id="captcha_message" name="captcha_message" 
+                              placeholder="Введите текст капчи..." required>{{ captcha_settings.captcha_message }}</textarea>
+                    <small>Текст, который будет показан пользователю для подтверждения</small>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="captcha_media_type">Тип медиа капчи:</label>
+                        <select id="captcha_media_type" name="captcha_media_type" onchange="toggleCaptchaMediaFields()">
+                            <option value="none" {% if captcha_settings.captcha_media_type == 'none' %}selected{% endif %}>Без медиа</option>
+                            <option value="photo" {% if captcha_settings.captcha_media_type == 'photo' %}selected{% endif %}>Фото</option>
+                            <option value="video" {% if captcha_settings.captcha_media_type == 'video' %}selected{% endif %}>Видео</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="captcha_media_url_group" 
+                         class="{% if captcha_settings.captcha_media_type != 'none' %}show{% else %}hide{% endif %}">
+                        <label for="captcha_media_url">URL медиа капчи:</label>
+                        <input type="text" id="captcha_media_url" name="captcha_media_url" 
+                               placeholder="https://example.com/captcha.jpg" 
+                               value="{{ captcha_settings.captcha_media_url }}"
+                               oninput="updateCaptchaMediaPreview()">
+                    </div>
+                </div>
+                
+                <div id="captcha_media_preview" class="media-preview {% if captcha_settings.captcha_media_type != 'none' and captcha_settings.captcha_media_url %}show{% else %}hide{% endif %}">
+                    <strong>Предварительный просмотр медиа капчи:</strong>
+                    <div id="captcha_preview_content"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="captcha_button_text">Текст кнопки капчи:</label>
+                    <input type="text" id="captcha_button_text" name="captcha_button_text" 
+                           placeholder="Я не робот" 
+                           value="{{ captcha_settings.captcha_button_text }}" required>
+                    <small>Текст кнопки, которую должен нажать пользователь</small>
+                </div>
+                
+                <button type="submit" class="save-btn">💾 Сохранить настройки капчи</button>
+            </form>
+            
+            <div class="html-help">
+                <h4>💡 HTML теги для форматирования текста капчи:</h4>
+                <p><code>&lt;b&gt;жирный текст&lt;/b&gt;</code> - <b>жирный текст</b></p>
+                <p><code>&lt;i&gt;курсив&lt;/i&gt;</code> - <i>курсив</i></p>
+                <p><code>&lt;u&gt;подчеркнутый&lt;/u&gt;</code> - <u>подчеркнутый</u></p>
+                <p><code>&lt;s&gt;зачеркнутый&lt;/s&gt;</code> - <s>зачеркнутый</s></p>
+                <p><code>&lt;code&gt;код&lt;/code&gt;</code> - <code>код</code></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleCaptchaMediaFields() {
+            const mediaType = document.getElementById('captcha_media_type').value;
+            const mediaUrlGroup = document.getElementById('captcha_media_url_group');
+            const mediaPreview = document.getElementById('captcha_media_preview');
+            
+            if (mediaType === 'none') {
+                mediaUrlGroup.classList.remove('show');
+                mediaUrlGroup.classList.add('hide');
+                mediaPreview.classList.remove('show');
+                mediaPreview.classList.add('hide');
+            } else {
+                mediaUrlGroup.classList.remove('hide');
+                mediaUrlGroup.classList.add('show');
+                updateCaptchaMediaPreview();
+            }
+        }
+        
+        function updateCaptchaMediaPreview() {
+            const mediaType = document.getElementById('captcha_media_type').value;
+            const mediaUrl = document.getElementById('captcha_media_url').value;
+            const mediaPreview = document.getElementById('captcha_media_preview');
+            const previewContent = document.getElementById('captcha_preview_content');
+            
+            if (mediaType !== 'none' && mediaUrl) {
+                mediaPreview.classList.remove('hide');
+                mediaPreview.classList.add('show');
+                
+                if (mediaType === 'photo') {
+                    previewContent.innerHTML = `
+                        <img src="${mediaUrl}" alt="Предварительный просмотр фото" onerror="this.style.display='none'">
+                    `;
+                } else if (mediaType === 'video') {
+                    previewContent.innerHTML = `
+                        <video controls>
+                            <source src="${mediaUrl}" type="video/mp4">
+                            Ваш браузер не поддерживает видео.
+                        </video>
+                    `;
+                }
+            } else {
+                mediaPreview.classList.remove('show');
+                mediaPreview.classList.add('hide');
+            }
+        }
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleCaptchaMediaFields();
+        });
+    </script>
+</body>
+</html>

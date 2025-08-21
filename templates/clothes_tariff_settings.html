@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка тарифа "Одежда" - Админ панель</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .breadcrumb {
+            margin-bottom: 2rem;
+        }
+        
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .help-text {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+        }
+        
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border: 1px solid transparent;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .preview-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 1px solid #e9ecef;
+        }
+        
+        .preview-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .button-preview {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            margin: 0.25rem;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+        
+        .button-preview:hover {
+            background: #5a6fd8;
+        }
+        
+        .media-preview {
+            margin-top: 1rem;
+            padding: 1.5rem;
+            border: 2px dashed #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            background: #f8f9fa;
+        }
+        
+        .media-preview img, .media-preview video {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .media-preview.hide {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👗 Настройка тарифа "Одежда"</h1>
+    </div>
+    
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_panel') }}">🏠 Главная</a> → <a href="{{ url_for('tariffs_settings') }}">💰 Тарифы</a> → 👗 Одежда
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <h2>📝 Текст тарифа</h2>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="message">Текст сообщения:</label>
+                    <textarea id="message" name="message" class="form-control" placeholder="Введите текст для тарифа 'Одежда'..." required>{{ clothes_config.message }}</textarea>
+                    <div class="help-text">Поддерживается HTML разметка</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="media_type">Тип медиа:</label>
+                    <select id="media_type" name="media_type" class="form-control" onchange="toggleMediaUrl()">
+                        <option value="none" {% if clothes_config.media_type == 'none' %}selected{% endif %}>Без медиа</option>
+                        <option value="photo" {% if clothes_config.media_type == 'photo' %}selected{% endif %}>Фото</option>
+                        <option value="video" {% if clothes_config.media_type == 'video' %}selected{% endif %}>Видео</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="media_url_group" style="display: none;">
+                    <label for="media_url">URL медиа или File ID:</label>
+                    <input type="text" id="media_url" name="media_url" class="form-control" 
+                           placeholder="Введите URL или File ID медиа..." 
+                           value="{{ clothes_config.media_url }}">
+                    <div class="help-text">Можно использовать URL (https://...) или File ID из Telegram</div>
+                </div>
+
+                <div id="media_preview" class="media-preview {% if clothes_config.media_type != 'none' and clothes_config.media_url %}show{% else %}hide{% endif %}">
+                    {% if clothes_config.media_type == 'photo' and clothes_config.media_url %}
+                        <img src="{{ clothes_config.media_url }}" alt="Попередній перегляд фото">
+                    {% elif clothes_config.media_type == 'video' and clothes_config.media_url %}
+                        <video controls>
+                            <source src="{{ clothes_config.media_url }}" type="video/mp4">
+                            Ваш браузер не поддерживает видео.
+                        </video>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="button_text">Текст кнопки "Оплатить тариф":</label>
+                    <input type="text" id="button_text" name="button_text" class="form-control" 
+                           placeholder="Введите текст кнопки..." 
+                           value="{{ clothes_config.button_text or '💳 Оплатить тариф' }}">
+                    <div class="help-text">Поддерживаются HTML теги для форматирования (например: &lt;b&gt;, &lt;i&gt;, &lt;u&gt;)</div>
+                </div>
+
+                <div class="preview-section">
+                    <h3>🔘 Текущие кнопки</h3>
+                    <div class="button-preview" id="button_preview">{{ clothes_config.button_text or '💳 Оплатить тариф' }}</div>
+                    <p><small>Эта кнопка автоматически добавляется к сообщению</small></p>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-success">💾 Сохранить настройки</button>
+                    <a href="{{ url_for('tariffs_settings') }}" class="btn btn-secondary">⬅️ Назад к тарифам</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleMediaUrl() {
+            const mediaType = document.getElementById('media_type').value;
+            const mediaUrlGroup = document.getElementById('media_url_group');
+            const mediaPreview = document.getElementById('media_preview');
+            
+            if (mediaType === 'none') {
+                mediaUrlGroup.style.display = 'none';
+                mediaPreview.classList.add('hide');
+            } else {
+                mediaUrlGroup.style.display = 'block';
+                if (document.getElementById('media_url').value) {
+                    mediaPreview.classList.remove('hide');
+                    updateMediaPreview();
+                }
+            }
+        }
+
+        function updateMediaPreview() {
+            const mediaType = document.getElementById('media_type').value;
+            const mediaUrl = document.getElementById('media_url').value;
+            const mediaPreview = document.getElementById('media_preview');
+            
+            if (mediaType !== 'none' && mediaUrl) {
+                mediaPreview.classList.remove('hide');
+                
+                if (mediaType === 'photo') {
+                    mediaPreview.innerHTML = `<img src="${mediaUrl}" alt="Попередній перегляд фото">`;
+                } else if (mediaType === 'video') {
+                    mediaPreview.innerHTML = `<video controls><source src="${mediaUrl}" type="video/mp4">Ваш браузер не підтримує відео.</video>`;
+                }
+            } else {
+                mediaPreview.classList.add('hide');
+            }
+        }
+
+        // Оновлюємо попередній перегляд при зміні URL
+        document.getElementById('media_url').addEventListener('input', updateMediaPreview);
+
+        // Оновлюємо попередній перегляд кнопки при зміні тексту
+        document.getElementById('button_text').addEventListener('input', function() {
+            const buttonPreview = document.getElementById('button_preview');
+            buttonPreview.innerHTML = this.value || '💳 Оплатить тариф';
+        });
+
+        // Ініціалізація при завантаженні сторінки
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleMediaUrl();
+        });
+    </script>
+</body>
+</html>

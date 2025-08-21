@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редагування розсилки</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .breadcrumb {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group textarea,
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group textarea:focus,
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group small {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .html-help {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .html-help h4 {
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+        
+        .html-help code {
+            background: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .media-preview {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .media-preview img,
+        .media-preview video {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+        
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .cancel-btn {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-left: 1rem;
+        }
+        
+        .cancel-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .flash-messages {
+            margin-bottom: 1rem;
+        }
+        
+        .flash-message {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .flash-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .flash-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .buttons-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .buttons-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        #buttons-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #f8f9fa;
+        }
+        
+        .button-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+        
+        .button-row input[type="text"] {
+            flex: 2;
+        }
+        
+        .button-row input[type="url"] {
+            flex: 3;
+        }
+        
+        .add-button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .add-button:hover {
+            transform: translateY(-1px);
+        }
+        
+        .remove-button {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .remove-button:hover {
+            transform: translateY(-1px);
+        }
+        
+        .mailing-info {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .mailing-info strong {
+            color: #495057;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .cancel-btn {
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>✏️ Редактирование рассылки</h1>
+        <div class="nav-buttons">
+            <a href="{{ url_for('mailing_settings') }}" class="nav-btn">📢 Рассылка</a>
+            <a href="{{ url_for('admin_panel') }}" class="nav-btn">🏠 Главная</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_panel') }}">🏠 Главная</a> → 
+            <a href="{{ url_for('mailing_settings') }}">📢 Рассылка</a> → 
+            ✏️ Редактирование рассылки
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="card">
+            <h2>✏️ Редактирование рассылки "{{ mailing[1] }}"</h2>
+            
+            <div class="mailing-info">
+                <strong>Текущие настройки:</strong><br>
+                <strong>Название:</strong> {{ mailing[1] }}<br>
+                <strong>Текст:</strong> {{ mailing[2][:100] }}{% if mailing[2]|length > 100 %}...{% endif %}<br>
+                <strong>Медиа:</strong> {{ mailing[3] }} {% if mailing[4] %}- {{ mailing[4][:50] }}...{% endif %}<br>
+                <strong>Кнопки:</strong> {{ mailing[5] if mailing[5] else 'Без кнопок' }}<br>
+                <strong>Статус:</strong> 
+                {% if mailing[6] %}
+                    <span style="color: #28a745;">✅ Отправлена</span>
+                {% elif mailing[10] and mailing[11] %}
+                    <span style="color: #007bff;">📅 Запланована на {{ mailing[10][:16] }}</span>
+                {% else %}
+                    <span style="color: #6c757d;">📝 Создана</span>
+                {% endif %}
+                <br>
+                <strong>Створено:</strong> {{ mailing[7] }}
+            </div>
+            
+            <form method="POST" action="{{ url_for('update_mailing', mailing_id=mailing[0]) }}" onsubmit="return validateForm()">
+                <div class="form-group">
+                    <label for="mailing_name">Название рассылки:</label>
+                    <input type="text" id="mailing_name" name="mailing_name" 
+                           placeholder="Название рассылки" value="{{ mailing[1] }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message_text">Текст сообщения:</label>
+                    <textarea id="message_text" name="message_text" 
+                              placeholder="Введите текст рассылки..." required>{{ mailing[2] }}</textarea>
+                    <small>Поддерживается HTML форматирование</small>
+                </div>
+                
+                <div class="html-help">
+                    <h4>💡 HTML теги для форматирования:</h4>
+                    <p><code>&lt;b&gt;жирный текст&lt;/b&gt;</code> - <b>жирный текст</b></p>
+                    <p><code>&lt;i&gt;курсив&lt;/i&gt;</code> - <i>курсив</i></p>
+                    <p><code>&lt;u&gt;подчеркнутый&lt;/u&gt;</code> - <u>подчеркнутый</u></p>
+                    <p><code>&lt;s&gt;зачеркнутый&lt;/s&gt;</code> - <s>зачеркнутый</s></p>
+                    <p><code>&lt;code&gt;код&lt;/code&gt;</code> - <code>код</code></p>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="media_type">Тип медиа:</label>
+                        <select id="media_type" name="media_type" onchange="toggleMediaFields()">
+                            <option value="none" {% if mailing[3] == "none" %}selected{% endif %}>Без медиа</option>
+                            <option value="photo" {% if mailing[3] == "photo" %}selected{% endif %}>Фото</option>
+                            <option value="video" {% if mailing[3] == "video" %}selected{% endif %}>Відео</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="media_url_group" style="display: none;">
+                        <label for="media_url">URL медиа файла:</label>
+                        <input type="text" id="media_url" name="media_url" 
+                               placeholder="https://example.com/image.jpg" 
+                               value="{{ mailing[4] }}" oninput="updateMediaPreview()">
+                    </div>
+                </div>
+                
+                <div id="media_preview" class="media-preview" style="display: none;">
+                    <strong>Попередній перегляд:</strong>
+                    <div id="preview_content">
+                        {% if mailing[3] == "photo" and mailing[4] %}
+                            <img src="{{ mailing[4] }}" alt="Попередній перегляд фото" style="max-width: 100%; border-radius: 8px; margin-top: 0.5rem;">
+                        {% elif mailing[3] == "video" and mailing[4] %}
+                            <video controls style="max-width: 100%; border-radius: 8px; margin-top: 0.5rem;">
+                                <source src="{{ mailing[4] }}" type="video/mp4">
+                                Ваш браузер не поддерживает видео.
+                            </video>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="buttons-section">
+                    <h3>📱 Inline кнопки</h3>
+                    <div id="buttons-container">
+                        {% if mailing[5] %}
+                            {% set inline_buttons = mailing[5]|from_json %}
+                            {% if inline_buttons and inline_buttons|length > 0 %}
+                                {% for button in inline_buttons %}
+                                    {% if button.text and button.url %}
+                                        <div class="button-row">
+                                            <input type="text" name="button_text[]" placeholder="Текст кнопки" value="{{ button.text }}" maxlength="64">
+                                            <input type="url" name="button_link[]" placeholder="Посилання" value="{{ button.url }}" maxlength="2048">
+                                            <button type="button" class="remove-button" onclick="removeButton(this)">Видалити</button>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endif %}
+                        
+                        <div class="button-row">
+                            <input type="text" name="button_text[]" placeholder="Текст кнопки" maxlength="64">
+                            <input type="url" name="button_link[]" placeholder="Посилання" maxlength="2048">
+                            <button type="button" class="remove-button" onclick="removeButton(this)" style="display: none;">Видалити</button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-button" onclick="addButton()">+ Добавить кнопку</button>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="save-btn">💾 Сохранить изменения</button>
+                    <a href="{{ url_for('mailing_settings') }}" class="cancel-btn">❌ Отменить</a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h2>ℹ️ Информация</h2>
+            <p>Тут вы можете редактировать название, текст, медиа и кнопки рассылки.</p>
+            <p><strong>HTML форматирование:</strong> Поддерживаются базовые HTML теги для стилизации текста.</p>
+            <p><strong>Медиа файлы:</strong> Можно добавить фото или видео с ссылкой на файл.</p>
+            <p><strong>Inline кнопки:</strong> Максимум 8 кнопок (ограничение Telegram), текст кнопки до 64 символов, URL до 2048 символов.</p>
+            <p><strong>Важливо:</strong> Изменения применяются мгновенно и сохраняются в SQLite базе данных.</p>
+        </div>
+    </div>
+    
+    <script>
+        function toggleMediaFields() {
+            const mediaType = document.getElementById('media_type').value;
+            const mediaUrlGroup = document.getElementById('media_url_group');
+            const mediaPreview = document.getElementById('media_preview');
+            
+            if (mediaType === 'none') {
+                mediaUrlGroup.style.display = 'none';
+                mediaPreview.style.display = 'none';
+            } else {
+                mediaUrlGroup.style.display = 'block';
+                updateMediaPreview();
+            }
+        }
+        
+        function updateMediaPreview() {
+            const mediaType = document.getElementById('media_type').value;
+            const mediaUrl = document.getElementById('media_url').value;
+            const mediaPreview = document.getElementById('media_preview');
+            const previewContent = document.getElementById('preview_content');
+            
+            if (mediaType !== 'none' && mediaUrl) {
+                mediaPreview.style.display = 'block';
+                
+                if (mediaType === 'photo') {
+                    previewContent.innerHTML = `
+                        <img src="${mediaUrl}" alt="Попередній перегляд фото" style="max-width: 100%; border-radius: 8px; margin-top: 0.5rem;" onerror="this.style.display='none'">
+                    `;
+                } else if (mediaType === 'video') {
+                    previewContent.innerHTML = `
+                        <video controls style="max-width: 100%; border-radius: 8px; margin-top: 0.5rem;">
+                            <source src="${mediaUrl}" type="video/mp4">
+                            Ваш браузер не підтримує відео.
+                        </video>
+                    `;
+                }
+            } else {
+                mediaPreview.style.display = 'none';
+            }
+        }
+        
+        function addButton() {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            
+            if (buttonRows.length >= 8) {
+                alert('Максимальна кількість кнопок - 8 (обмеження Telegram)');
+                return;
+            }
+            
+            const buttonRow = document.createElement('div');
+            buttonRow.className = 'button-row';
+            
+            buttonRow.innerHTML = `
+                <input type="text" name="button_text[]" placeholder="Текст кнопки" maxlength="64">
+                <input type="url" name="button_link[]" placeholder="Посилання" maxlength="2048">
+                <button type="button" class="remove-button" onclick="removeButton(this)">Видалити</button>
+            `;
+            
+            container.appendChild(buttonRow);
+            updateRemoveButtonsVisibility();
+        }
+        
+        function removeButton(button) {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            
+            if (buttonRows.length > 1) {
+                const buttonRow = button.closest('.button-row');
+                if (buttonRow) {
+                    buttonRow.remove();
+                }
+                updateRemoveButtonsVisibility();
+            }
+        }
+        
+        function updateRemoveButtonsVisibility() {
+            const container = document.getElementById('buttons-container');
+            const buttonRows = container.querySelectorAll('.button-row');
+            const removeButtons = container.querySelectorAll('.remove-button');
+            
+            if (buttonRows.length === 1) {
+                removeButtons.forEach(btn => btn.style.display = 'none');
+            } else {
+                removeButtons.forEach(btn => btn.style.display = 'block');
+            }
+        }
+        
+        function validateForm() {
+            const buttonTexts = document.querySelectorAll('input[name="button_text[]"]');
+            const buttonLinks = document.querySelectorAll('input[name="button_link[]"]');
+            
+            const validButtons = [];
+            for (let i = 0; i < buttonTexts.length; i++) {
+                const text = buttonTexts[i].value.trim();
+                const link = buttonLinks[i].value.trim();
+                
+                if ((text && !link) || (!text && link)) {
+                    alert('Будь ласка, заповніть обидва поля для кнопки або залиште обидва порожніми');
+                    return false;
+                }
+                
+                if (text && link) {
+                    validButtons.push({ text, link });
+                }
+            }
+            
+            if (validButtons.length > 8) {
+                alert('Максимальна кількість кнопок - 8 (обмеження Telegram)');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial display state based on mailing data
+            const mediaType = '{{ mailing[3] }}';
+            const mediaUrl = '{{ mailing[4] }}';
+            
+            if (mediaType !== 'none') {
+                document.getElementById('media_url_group').style.display = 'block';
+            }
+            
+            if (mediaType !== 'none' && mediaUrl) {
+                document.getElementById('media_preview').style.display = 'block';
+            }
+            
+            toggleMediaFields();
+            updateRemoveButtonsVisibility();
+            
+            document.getElementById('media_url').addEventListener('input', updateMediaPreview);
+        });
+    </script>
+</body>
+</html>

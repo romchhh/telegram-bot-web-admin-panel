@@ -1,0 +1,2191 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка рассылки</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .breadcrumb {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .coming-soon {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #666;
+        }
+        
+        .coming-soon .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+        
+        .coming-soon h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .coming-soon p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .features-list h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .features-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+            color: #666;
+        }
+        
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .features-list li:before {
+            content: "🚀 ";
+            margin-right: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group textarea,
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group textarea:focus,
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group small {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .html-help {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .html-help h4 {
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+        }
+        
+        .html-help code {
+            background: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .media-preview {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .media-preview img,
+        .media-preview video {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+        
+        .file-id-preview {
+            background: #f8f9fa;
+            border: 2px dashed #6c757d;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+        
+        .file-id-preview i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .file-id-preview p {
+            margin: 0.5rem 0;
+            font-family: monospace;
+            word-break: break-all;
+            color: #495057;
+        }
+        
+        .file-id-preview small {
+            color: #6c757d;
+        }
+        
+        .add-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .add-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .mailings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        /* Стилі для індикатора завантаження */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .mailing-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .mailing-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mailing-card h3 {
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mailing-card p {
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .mailing-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .delete-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .delete-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .status-active {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-scheduled {
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        .status-inactive {
+            color: #6c757d;
+            font-weight: bold;
+        }
+        
+        .cancel-schedule-btn {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-right: 8px;
+        }
+        
+        .cancel-schedule-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .resend-btn {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-right: 8px;
+        }
+        
+        .resend-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .make-recurring-btn {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-right: 8px;
+        }
+        
+        .make-recurring-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .toggle-recurring-btn {
+            background: linear-gradient(135deg, #fd7e14 0%, #e55a00 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-right: 8px;
+        }
+        
+        .toggle-recurring-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        /* Стилі для вкладок */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 1rem;
+        }
+        
+        .tab-btn {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: none;
+        }
+        
+        .tab-btn:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .tab-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+        
+        .tab-btn:not(.active) .tab-count {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Стилі для різних типів карток */
+        .sent-card {
+            border-left: 4px solid #28a745;
+        }
+        
+        .scheduled-card {
+            border-left: 4px solid #007bff;
+        }
+        
+        .recurring-card {
+            border-left: 4px solid #ffc107;
+        }
+        
+        /* Стилі для швидких дій */
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .quick-action-btn {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+        }
+        
+        /* Стилі для пошуку та фільтрації */
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+        
+        .search-filter input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .search-filter input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-filter select {
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+            min-width: 150px;
+        }
+        
+        .search-filter select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group select[multiple] {
+            min-height: 120px;
+        }
+        
+        .status-filter {
+            color: #007bff;
+            font-weight: 500;
+        }
+        
+
+        
+        .media-url {
+            color: #007bff;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        .media-file-id {
+            color: #28a745;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        .buttons-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .buttons-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .button-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+        
+        .button-row input {
+            padding: 0.5rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .remove-button {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .add-button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .send-btn {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .send-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .schedule-btn {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-left: 8px;
+        }
+        
+        .schedule-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            
+            .tab-btn {
+                border-radius: 8px;
+                text-align: center;
+            }
+            
+            .search-filter {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .quick-actions {
+                flex-direction: column;
+            }
+            
+            .mailing-actions {
+                flex-direction: column;
+            }
+            
+            .mailing-actions button {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            .mailings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Стилі для статусів */
+        .status-active {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-scheduled {
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        .status-inactive {
+            color: #6c757d;
+            font-weight: bold;
+        }
+        
+        /* Стилі для карток різних типів */
+        .sent-card {
+            border-left: 4px solid #28a745;
+        }
+        
+        .scheduled-card {
+            border-left: 4px solid #007bff;
+        }
+        
+        .recurring-card {
+            border-left: 4px solid #ffc107;
+        }
+        
+        /* Стилі для детальної інформації */
+        .mailing-card small {
+            color: #6c757d;
+            font-size: 0.85em;
+        }
+        
+        .mailing-card .status-active {
+            color: #28a745;
+        }
+        
+        .mailing-card .status-scheduled {
+            color: #007bff;
+        }
+        
+        .mailing-card .status-inactive {
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📢 Настройки рассылки</h1>
+        <div class="nav-buttons">
+            <a href="{{ url_for('admin_panel') }}" class="nav-btn">🏠 Главная</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_panel') }}">🏠 Главная</a> → 📢 Рассылка
+        </div>
+        
+        <div class="card">
+            <h2>➕ Создать новую рассылку</h2>
+            <form method="POST" action="{{ url_for('create_mailing_route') }}" id="mailingForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="mailing_name">Название рассылки:</label>
+                    <input type="text" id="mailing_name" name="mailing_name" 
+                           placeholder="Название рассылки" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message_text">Текст сообщения:</label>
+                    <textarea id="message_text" name="message_text" 
+                              placeholder="Введите текст рассылки..." required></textarea>
+                    <small>Поддерживается HTML разметка</small>
+                </div>
+                
+                <div class="html-help">
+                    <h4>💡 HTML теги для форматирования:</h4>
+                    <p><code>&lt;b&gt;жирный текст&lt;/b&gt;</code> - <b>жирный текст</b></p>
+                    <p><code>&lt;i&gt;курсив&lt;/i&gt;</code> - <i>курсив</i></p>
+                    <p><code>&lt;u&gt;подчеркнутый&lt;/u&gt;</code> - <u>подчеркнутый</u></p>
+                    <p><code>&lt;s&gt;зачеркнутый&lt;/s&gt;</code> - <s>зачеркнутый</s></p>
+                    <p><code>&lt;code&gt;код&lt;/code&gt;</code> - <code>код</code></p>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="media_type">Тип медиа:</label>
+                        <select id="media_type" name="media_type" onchange="toggleMediaFields()">
+                            <option value="none">Без медиа</option>
+                            <option value="photo">Фото</option>
+                            <option value="video">Видео</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="media_url_group" style="display: none;">
+                        <label for="media_url">URL медиа файла или File ID:</label>
+                        <input type="text" id="media_url" name="media_url" 
+                               placeholder="https://example.com/image.jpg или BAACAgIAAxkDAAI..." oninput="updateMediaPreview()">
+                        <div class="help-text">
+                            <strong>Можно использовать:</strong><br>
+                            • <strong>URL:</strong> https://example.com/image.jpg<br>
+                            • <strong>File ID:</strong> BAACAgIAAxkDAAI... (получается при отправке медиа в Telegram)
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="media_preview" class="media-preview" style="display: none;">
+                    <strong>Предварительный просмотр:</strong>
+                    <div id="preview_content"></div>
+                </div>
+                
+                <div class="buttons-section">
+                    <h3>📱 Inline кнопки</h3>
+                    <div id="buttons-container">
+                        <div class="button-row">
+                            <input type="text" name="button_text[]" placeholder="Текст кнопки">
+                            <input type="url" name="button_link[]" placeholder="Ссылка">
+                            <button type="button" class="remove-button" onclick="removeButton(this)" style="display: none;">Удалить</button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-button" onclick="addButton()">+ Добавить кнопку</button>
+                </div>
+                
+                <div class="schedule-section">
+                    <h3>⏰ Планирование рассылки</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="schedule_type">Тип рассылки:</label>
+                            <select id="schedule_type" name="schedule_type" onchange="toggleScheduleFields()">
+                                <option value="immediate">Сразу</option>
+                                <option value="scheduled">Запланировать</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" id="schedule_datetime_group" style="display: none;">
+                            <label for="schedule_datetime">Дата и время (Киев):</label>
+                            <input type="datetime-local" id="schedule_datetime" name="schedule_datetime">
+                            <small>Время устанавливается по киевскому часовому поясу (UTC+3)</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="user_filter">Фильтр пользователей:</label>
+                        <select id="user_filter" name="user_filter" onchange="toggleUserFilterFields()">
+                            <option value="all">Все пользователи</option>
+                            <option value="status">По статусу</option>
+                        </select>
+                        <small>Выберите, кому отправлять рассылку</small>
+                    </div>
+                    
+                    <div class="form-group" id="status_filter_group" style="display: none;">
+                        <label for="user_status">Статус пользователей:</label>
+                        <select id="user_status" name="user_status" multiple>
+                            <option value="Нажал старт">Нажал старт</option>
+                            <option value="Прошел капчу">Прошел капчу</option>
+                            <option value="Посмотрел ответы">Посмотрел ответы</option>
+                            <option value="Посмотрел приватный урок">Посмотрел приватный урок</option>
+                            <option value="Посмотрел тарифы">Посмотрел тарифы</option>
+                            <option value="Посмотрел тарифы одежда">Посмотрел тарифы одежда</option>
+                            <option value="Посмотрел тарифы техника">Посмотрел тарифы техника</option>
+                            <option value="Нажал оплатить техника">Нажал оплатить техника</option>
+                            <option value="Нажал оплатить одежда">Нажал оплатить одежда</option>
+                            <option value="Оплатил одежду">Оплатил одежду</option>
+                            <option value="Оплатил технику">Оплатил технику</option>
+                        </select>
+                        <small>Выберите один или несколько статусов (Ctrl+Click для множественного выбора)</small>
+                    </div>
+                    
+                    <div class="form-group" id="recurring_section" style="display: none;">
+                        <label>
+                            <input type="checkbox" id="is_recurring" name="is_recurring" onchange="toggleRecurringFields()">
+                            🔄 Сделать рассылку повторяющейся
+                        </label>
+                        
+                        <div id="recurring_fields" style="display: none; margin-top: 1rem;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="recurring_days">Дни недели:</label>
+                                    <select id="recurring_days" name="recurring_days" multiple>
+                                        <option value="0">Понедельник</option>
+                                        <option value="1">Вторник</option>
+                                        <option value="2">Среда</option>
+                                        <option value="3">Четверг</option>
+                                        <option value="4">Пятница</option>
+                                        <option value="5">Суббота</option>
+                                        <option value="6">Воскресенье</option>
+                                    </select>
+                                    <small>Выберите дни недели для автоматической отправки</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="recurring_time">Время отправки (Киев):</label>
+                                    <input type="time" id="recurring_time" name="recurring_time" value="09:00">
+                                    <small>Время по киевскому часовому поясу</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="add-btn">📝 Создать рассылку</button>
+                    <button type="button" class="send-btn" onclick="createAndSendMailing()">📢 Создать и отправить</button>
+                    <button type="button" class="schedule-btn" onclick="createAndScheduleMailing()" style="display: none;">📅 Создать и запланировать</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h2>📋 Управление рассылками</h2>
+            
+            <!-- Вкладки для различных типов рассылок -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('all')">
+                    📋 Все рассылки 
+                    <span class="tab-count">({{ mailings|length }})</span>
+                </button>
+                <button class="tab-btn" onclick="showTab('sent')">
+                    ✅ Отправленные 
+                    <span class="tab-count" id="sent-count">(0)</span>
+                </button>
+                <button class="tab-btn" onclick="showTab('scheduled')">
+                    📅 Запланированные 
+                    <span class="tab-count" id="scheduled-count">(0)</span>
+                </button>
+                <button class="tab-btn" onclick="showTab('recurring')">
+                    🔄 Повторяющиеся 
+                    <span class="tab-count" id="recurring-count">(0)</span>
+                </button>
+            </div>
+            
+            <!-- Вкладка "Все рассылки" -->
+            <div id="tab-all" class="tab-content active">
+                <!-- DEBUG: Общее количество рассылок: {{ mailings|length }} -->
+                {% if mailings %}
+                    <div class="mailings-grid">
+                        {% for mailing in mailings %}
+                            <!-- DEBUG: Рассылка {{ loop.index }}: ID={{ mailing[0] }}, is_active={{ mailing[6] }}, is_scheduled={{ mailing[11] }}, is_recurring={{ mailing[13] if mailing|length > 13 else 'N/A' }}, scheduled_at={{ mailing[10] }}, next_scheduled_at={{ mailing[16] if mailing|length > 16 else 'N/A' }} -->
+                            <div class="mailing-card">
+                                <h3>{{ mailing[1] }}</h3>
+                                <p><strong>Текст:</strong> {{ mailing[2][:50] }}{% if mailing[2]|length > 50 %}...{% endif %}</p>
+                                <p><strong>Медиа:</strong> {{ mailing[3] }} 
+                                {% if mailing[4] %}
+                                    {% if mailing[4].startswith(('http://', 'https://')) %}
+                                        - <span class="media-url">URL: {{ mailing[4][:30] }}...</span>
+                                    {% else %}
+                                        - <span class="media-file-id">File ID: {{ mailing[4][:20] }}...</span>
+                                    {% endif %}
+                                {% endif %}
+                                </p>
+                                <p><strong>Кнопки:</strong> {{ mailing[5] if mailing[5] else 'Без кнопок' }}</p>
+                                <p><strong>Статус:</strong> 
+                                    {% if mailing[6] %}
+                                        <span class="status-active">✅ Отправлена</span>
+                                    {% elif mailing[10] and mailing[11] %}
+                                        <span class="status-scheduled">📅 Запланирована на {{ mailing[10][:16] }}</span>
+                                        {% if mailing[10] %}
+                                            <br><small>📅 Запланировано на: {{ mailing[10][:16] }} (Киев)</small>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="status-inactive">📝 Создана</span>
+                                    {% endif %}
+                                </p>
+                                
+                                {% if mailing|length > 13 and mailing[13] %}
+                                <p><strong>🔄 Повторяющаяся:</strong> 
+                                    <span class="status-active">✅ Активна</span>
+                                    <!-- DEBUG: mailing[14] = {{ mailing[14] if mailing|length > 14 else 'N/A' }} -->
+                                    {% if mailing|length > 14 and mailing[14] %}
+                                        <br><small>📅 Дни недели: 
+                                            {% set days_map = {0: 'Понедельник', 1: 'Вторник', 2: 'Среда', 3: 'Четверг', 4: 'Пятница', 5: 'Суббота', 6: 'Воскресенье'} %}
+                                            <!-- DEBUG: Разбиваем строку "{{ mailing[14] }}" на дни -->
+                                            {% for day in mailing[14].split(',') %}
+                                                <!-- DEBUG: День {{ loop.index }}: "{{ day }}" -> {{ days_map[day|int] }} -->
+                                                {{ days_map[day|int] }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                    {% endif %}
+                                    {% if mailing|length > 15 and mailing[15] %}
+                                        <br><small>⏰ Время отправки: {{ mailing[15] }} (Киев)</small>
+                                    {% endif %}
+                                </p>
+                                {% endif %}
+                                
+                                <p><strong>Создано:</strong> {{ mailing[7] }}</p>
+                                <p><strong>Отправлено:</strong> 
+                                    {% if mailing[8] %}
+                                        {{ mailing[8] }} ({{ mailing[9] }} пользователей)
+                                    {% else %}
+                                        Не отправлялась
+                                    {% endif %}
+                                </p>
+                                <p><strong>Пользователей:</strong> {{ mailing[9] if mailing[9] else '0' }}</p>
+                                
+                                {% if mailing|length > 17 and mailing[17] and mailing[17] != 'all' %}
+                                <p><strong>Фильтр пользователей:</strong> 
+                                    {% if mailing[17] == 'status' %}
+                                        <span class="status-filter">По статусу: {{ mailing[18] if mailing[18] else 'Не указан' }}</span>
+                                    {% endif %}
+                                </p>
+                                {% endif %}
+                                
+                                <div class="mailing-actions">
+                                    {% if not mailing[6] and not mailing[11] %}
+                                        <button class="start-btn" data-id="{{ mailing[0] }}">
+                                            🚀 Отправить
+                                        </button>
+                                    {% endif %}
+                                    
+                                    {% if mailing[11] and not mailing[6] %}
+                                        <button class="cancel-schedule-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                            ❌ Отменить планирование
+                                        </button>
+                                    {% endif %}
+                                    
+                                    {% if mailing[6] %}
+                                        <button class="resend-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                            🔄 Отправить снова
+                                        </button>
+                                    {% endif %}
+                                    
+                                    {% if mailing[6] and not mailing[13] %}
+                                        <button class="make-recurring-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                            🔄 Сделать повторяющейся
+                                        </button>
+                                    {% endif %}
+                                    
+                                    {% if mailing|length > 13 and mailing[13] %}
+                                        <button class="toggle-recurring-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}" data-active="true">
+                                            🔄 Выключить повторение
+                                        </button>
+                                    {% endif %}
+
+                                    <a href="{{ url_for('edit_mailing', mailing_id=mailing[0]) }}" class="edit-btn" style="
+                                        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+                                        color: white;
+                                        border: none;
+                                        padding: 0.5rem 1rem;
+                                        border-radius: 6px;
+                                        font-size: 0.9rem;
+                                        text-decoration: none;
+                                        display: inline-block;
+                                        transition: transform 0.2s ease;
+                                        margin-right: 8px;
+                                    " onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                                        ✏️ Редактировать
+                                    </a>
+
+                                    <button class="delete-btn" 
+                                            data-id="{{ mailing[0] }}"
+                                            data-name="{{ mailing[1]|e }}">
+                                        🗑️ Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 3rem; color: #6c757d;">
+                        <h3>📭 Рассылок не найдено</h3> 
+                        <p>Создайте первую рассылку, чтобы начать использовать эту функцию</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Вкладка "Отправленные рассылки" -->
+            <div id="tab-sent" class="tab-content">
+                {% set sent_mailings = [] %}
+                {% for mailing in mailings %}
+                    {% if mailing[6] == 1 %}
+                        {% set _ = sent_mailings.append(mailing) %}
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- DEBUG: Найдено отправленных рассылок: {{ sent_mailings|length }} -->
+                {% if sent_mailings %}
+                    <div class="mailings-grid">
+                        {% for mailing in sent_mailings %}
+                            <div class="mailing-card sent-card">
+                                <h3>{{ mailing[1] }}</h3>
+                                <p><strong>Текст:</strong> {{ mailing[2][:50] }}{% if mailing[2]|length > 50 %}...{% endif %}</p>
+                                <p><strong>Отправлено:</strong> {{ mailing[8] }} ({{ mailing[9] }} пользователей)</p>
+                                <p><strong>Создано:</strong> {{ mailing[7] }}</p>
+                                
+                                <div class="mailing-actions">
+                                    <button class="resend-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                        🔄 Отправить снова
+                                    </button>
+                                    
+                                    {% if not mailing[13] %}
+                                        <button class="make-recurring-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                            🔄 Сделать повторяющейся
+                                        </button>
+                                    {% endif %}
+                                    
+                                    <a href="{{ url_for('edit_mailing', mailing_id=mailing[0]) }}" class="edit-btn" style="
+                                        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+                                        color: white;
+                                        border: none;
+                                        padding: 0.5rem 1rem;
+                                        border-radius: 6px;
+                                        font-size: 0.9rem;
+                                        text-decoration: none;
+                                        display: inline-block;
+                                        transition: transform 0.2s ease;
+                                        margin-right: 8px;
+                                    " onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                                        ✏️ Редактировать
+                                    </a>
+                                    
+                                    <button class="delete-btn" 
+                                            data-id="{{ mailing[0] }}"
+                                            data-name="{{ mailing[1]|e }}">
+                                        🗑️ Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 3rem; color: #6c757d;">
+                        <h3>📭 Отправленных рассылок не найдено</h3> 
+                        <p>Сначала создайте и отправьте рассылку</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Вкладка "Запланированные рассылки" -->
+            <div id="tab-scheduled" class="tab-content">
+                {% set scheduled_mailings = [] %}
+                {% for mailing in mailings %}
+                    {% if mailing[11] == 1 %}
+                        {% set _ = scheduled_mailings.append(mailing) %}
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- DEBUG: Найдено запланированных рассылок: {{ scheduled_mailings|length }} -->
+                {% if scheduled_mailings %}
+                    <div class="mailings-grid">
+                        {% for mailing in scheduled_mailings %}
+                            <!-- DEBUG: Запланированная рассылка {{ loop.index }}: ID={{ mailing[0] }}, is_recurring={{ mailing[13] if mailing|length > 13 else 'N/A' }}, recurring_days={{ mailing[14] if mailing|length > 14 else 'N/A' }}, recurring_time={{ mailing[15] if mailing|length > 15 else 'N/A' }}, next_scheduled_at={{ mailing[16] if mailing|length > 16 else 'N/A' }} -->
+                            <div class="mailing-card scheduled-card">
+                                <h3>{{ mailing[1] }}</h3>
+                                <p><strong>Текст:</strong> {{ mailing[2][:50] }}{% if mailing[2]|length > 50 %}...{% endif %}</p>
+                                <p><strong>📅 Запланировано на:</strong> {{ mailing[10][:16] if mailing[10] else 'N/A' }} (Киев)</p>
+                                {% if mailing|length > 13 and mailing[13] %}
+                                <p><strong>🔄 Повторяющаяся:</strong> 
+                                    <span class="status-active">✅ Да</span>
+                                    <!-- DEBUG: mailing[14] = {{ mailing[14] if mailing|length > 14 else 'N/A' }} -->
+                                    {% if mailing|length > 14 and mailing[14] %}
+                                        <br><small>📅 Дни недели: 
+                                            {% set days_map = {0: 'Понедельник', 1: 'Вторник', 2: 'Среда', 3: 'Четверг', 4: 'Пятница', 5: 'Суббота', 6: 'Воскресенье'} %}
+                                            <!-- DEBUG: Разбиваем строку "{{ mailing[14] }}" на дни -->
+                                            {% for day in mailing[14].split(',') %}
+                                                <!-- DEBUG: День {{ loop.index }}: "{{ day }}" -> {{ days_map[day|int] }} -->
+                                                {{ days_map[day|int] }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                    {% endif %}
+                                    {% if mailing|length > 15 and mailing[15] %}
+                                        <br><small>⏰ Время отправки: {{ mailing[15] }} (Киев)</small>
+                                    {% endif %}
+
+                                </p>
+                                {% endif %}
+                                <p><strong>Создано:</strong> {{ mailing[7] }}</p>
+                                
+                                <div class="mailing-actions">
+                                    <a href="{{ url_for('edit_mailing', mailing_id=mailing[0]) }}" class="edit-btn" style="
+                                        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+                                        color: white;
+                                        border: none;
+                                        padding: 0.5rem 1rem;
+                                        border-radius: 6px;
+                                        font-size: 0.9rem;
+                                        text-decoration: none;
+                                        display: inline-block;
+                                        transition: transform 0.2s ease;
+                                        margin-right: 8px;
+                                    " onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                                        ✏️ Редактировать
+                                    </a>
+                                    
+                                    <button class="start-btn" data-id="{{ mailing[0] }}">
+                                        🚀 Отправить сейчас
+                                    </button>
+                                    
+                                    <button class="cancel-schedule-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                        ❌ Отменить планирование
+                                    </button>
+                                    
+                                    <button class="delete-btn" 
+                                            data-id="{{ mailing[0] }}"
+                                            data-name="{{ mailing[1]|e }}">
+                                        🗑️ Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 3rem; color: #6c757d;">
+                        <h3>📭 Запланированных рассылок не найдено</h3> 
+                        <p>Создайте рассылку с планированием, чтобы она появилась тут</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Вкладка "Повторяющиеся рассылки" -->
+            <div id="tab-recurring" class="tab-content">
+                {% set recurring_mailings = [] %}
+                {% for mailing in mailings %}
+                    {% if mailing|length > 13 and mailing[13] == 1 %}
+                        {% set _ = recurring_mailings.append(mailing) %}
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- DEBUG: Найдено повторяющихся рассылок: {{ recurring_mailings|length }} -->
+                {% if recurring_mailings %}
+                    <div class="mailings-grid">
+                        {% for mailing in recurring_mailings %}
+                            <div class="mailing-card recurring-card">
+                                <h3>{{ mailing[1] }}</h3>
+                                <p><strong>Текст:</strong> {{ mailing[2][:50] }}{% if mailing[2]|length > 50 %}...{% endif %}</p>
+                                <p><strong>🔄 График повторения:</strong> 
+                                    <!-- DEBUG: mailing[14] = {{ mailing[14] if mailing|length > 14 else 'N/A' }} -->
+                                    {% if mailing|length > 14 and mailing[14] %}
+                                        <br><small>📅 Дни недели: 
+                                            {% set days_map = {0: 'Понедельник', 1: 'Вторник', 2: 'Среда', 3: 'Четверг', 4: 'Пятница', 5: 'Суббота', 6: 'Воскресенье'} %}
+                                            <!-- DEBUG: Разбиваем строку "{{ mailing[14] }}" на дни -->
+                                            {% for day in mailing[14].split(',') %}
+                                                <!-- DEBUG: День {{ loop.index }}: "{{ day }}" -> {{ days_map[day|int] }} -->
+                                                {{ days_map[day|int] }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                    {% endif %}
+                                    {% if mailing|length > 15 and mailing[15] %}
+                                        <br><small>⏰ Время отправки: {{ mailing[15] }} (Киев)</small>
+                                    {% endif %}
+                                </p>
+                                <p><strong>🔄 Следующая отправка:</strong> 
+                                    {% if mailing|length > 17 and mailing[17] %}
+                                        {{ mailing[17][:16] }} (Киев)
+                                    {% else %}
+                                        <span class="status-inactive">Не запланирована</span>
+                                    {% endif %}
+                                </p>
+                                <p><strong>📤 Последняя отправка:</strong> 
+                                    {% if mailing[8] %}
+                                        {{ mailing[8][:16] }} ({{ mailing[9] }} пользователей)
+                                    {% else %}
+                                        <span class="status-inactive">Не отправлялась</span>
+                                    {% endif %}
+                                </p>
+                                <p><strong>📅 Статус планирования:</strong> 
+                                    {% if mailing[11] %}
+                                        <span class="status-scheduled">📅 Запланирована</span>
+                                        {% if mailing[10] %}
+                                            <br><small>на {{ mailing[10][:16] }} (Киев)</small>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="status-inactive">Не запланирована</span>
+                                    {% endif %}
+                                </p>
+                                <p><strong>Создано:</strong> {{ mailing[7] }}</p>
+                                
+                                <div class="mailing-actions">
+                                    <a href="{{ url_for('edit_mailing', mailing_id=mailing[0]) }}" class="edit-btn" style="
+                                        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+                                        color: white;
+                                        border: none;
+                                        padding: 0.5rem 1rem;
+                                        border-radius: 6px;
+                                        font-size: 0.9rem;
+                                        text-decoration: none;
+                                        display: inline-block;
+                                        transition: transform 0.2s ease;
+                                        margin-right: 8px;
+                                    " onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                                        ✏️ Редактировать
+                                    </a>
+                                    
+                                    <button class="resend-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                        🔄 Отправить снова
+                                    </button>
+                                    
+                                    <button class="toggle-recurring-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}" data-active="true">
+                                        🔄 Выключить повторение
+                                    </button>
+                                    
+                                    <button class="delete-btn" 
+                                            data-id="{{ mailing[0] }}"
+                                            data-name="{{ mailing[1]|e }}">
+                                        🗑️ Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 3rem; color: #6c757d;">
+                        <h3>📭 Повторяющихся рассылок не найдено</h3> 
+                        <p>Создайте рассылку с повторением, чтобы она появилась тут</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>ℹ️ О рассылке</h2>
+            <p>Рассылка позволит вам эффективно взаимодействовать с пользователями бота, отправляя важные сообщения, новости, акции и другие обновления.</p>
+            <p><strong>Важно:</strong> Все настройки рассылки будут сохраняться в SQLite базе данных вместе с другими настройками бота.</p>
+        </div>
+    </div>
+    
+    <script>
+        function toggleMediaFields() {
+            const mediaType = document.getElementById('media_type').value;
+            const mediaUrlGroup = document.getElementById('media_url_group');
+            const mediaPreview = document.getElementById('media_preview');
+            
+            if (mediaType === 'none') {
+                mediaUrlGroup.style.display = 'none';
+                mediaPreview.style.display = 'none';
+            } else {
+                mediaUrlGroup.style.display = 'block';
+                updateMediaPreview();
+            }
+        }
+        
+        function updateMediaPreview() {
+            const mediaType = document.getElementById('media_type').value;
+            const mediaUrl = document.getElementById('media_url').value;
+            const mediaPreview = document.getElementById('media_preview');
+            const previewContent = document.getElementById('preview_content');
+            
+            if (mediaType !== 'none' && mediaUrl) {
+                mediaPreview.style.display = 'block';
+                
+                // Проверяем, является ли это URL или File ID
+                const isUrl = mediaUrl.startsWith('http://') || mediaUrl.startsWith('https://');
+                
+                if (mediaType === 'photo') {
+                    if (isUrl) {
+                        previewContent.innerHTML = `
+                            <img src="${mediaUrl}" alt="Предварительный просмотр фото" onerror="this.style.display='none'">
+                        `;
+                    } else {
+                        previewContent.innerHTML = `
+                            <div class="file-id-preview">
+                                <i class="📷"></i>
+                                <p><strong>File ID:</strong> ${mediaUrl}</p>
+                                <small>Предварительный просмотр недоступен для File ID</small>
+                            </div>
+                        `;
+                    }
+                } else if (mediaType === 'video') {
+                    if (isUrl) {
+                        previewContent.innerHTML = `
+                            <video controls>
+                                <source src="${mediaUrl}" type="video/mp4">
+                                Ваш браузер не поддерживает видео.
+                            </video>
+                        `;
+                    } else {
+                        previewContent.innerHTML = `
+                            <div class="file-id-preview">
+                                <i class="🎥"></i>
+                                <p><strong>File ID:</strong> ${mediaUrl}</p>
+                                <small>Предварительный просмотр недоступен для File ID</small>
+                            </div>
+                        `;
+                    }
+                }
+            } else {
+                mediaPreview.style.display = 'none';
+            }
+        }
+        
+        function startMailing(id) {
+            if (confirm('Вы уверены, что хотите запустить эту рассылку? Она будет отправлена всем пользователям бота.')) {
+                window.location.href = `/start_mailing/${id}`;
+            }
+        }
+        
+        function deleteMailing(id, mailingName) {
+            if (confirm(`Вы уверены, что хотите удалить рассылку "${mailingName}"?`)) {
+                window.location.href = `/delete_mailing/${id}`;
+            }
+        }
+        
+        function cancelScheduledMailing(id, mailingName) {
+            if (confirm(`Вы уверены, что хотите отменить планирование рассылки "${mailingName}"?`)) {
+                window.location.href = `/cancel_scheduled_mailing/${id}`;
+            }
+        }
+        
+
+        
+        function addButton() {
+            const container = document.getElementById('buttons-container');
+            const buttonRow = document.createElement('div');
+            buttonRow.className = 'button-row';
+            
+            buttonRow.innerHTML = `
+                <input type="text" name="button_text[]" placeholder="Текст кнопки">
+                <input type="url" name="button_link[]" placeholder="Ссылка">
+                <button type="button" class="remove-button" onclick="removeButton(this)">Удалить</button>
+            `;
+            
+            container.appendChild(buttonRow);
+            
+            console.log('🔍 DEBUG: Добавлена новая кнопка');
+            console.log('   Контейнер:', container);
+            console.log('   Количество кнопок после добавления:', container.querySelectorAll('input[name="button_text[]"]').length);
+        }
+        
+        function removeButton(button) {
+            const container = document.getElementById('buttons-container');
+            button.parentElement.remove();
+            
+            console.log('🔍 DEBUG: Удалена кнопка');
+            console.log('   Количество кнопок после удаления:', container.querySelectorAll('input[name="button_text[]"]').length);
+        }
+        
+        function createAndSendMailing() {
+            console.log('🔍 DEBUG: createAndSendMailing викликано');
+            
+            // Збираємо дані з форми
+            const formData = new FormData();
+            formData.append('mailing_name', document.getElementById('mailing_name').value);
+            formData.append('message_text', document.getElementById('message_text').value);
+            formData.append('media_type', document.getElementById('media_type').value);
+            formData.append('media_url', document.getElementById('media_url').value || '');
+            
+            // Збираємо кнопки
+            const buttonTexts = document.querySelectorAll('input[name="button_text[]"]');
+            const buttonLinks = document.querySelectorAll('input[name="button_link[]"]');
+            const buttons = [];
+            
+            console.log('🔍 DEBUG: Збираємо кнопки з форми:');
+            console.log('   buttonTexts:', buttonTexts);
+            console.log('   buttonLinks:', buttonLinks);
+            console.log('   Кількість:', buttonTexts.length);
+            
+            // Перевіряємо кожне поле окремо
+            buttonTexts.forEach((input, index) => {
+                console.log(`   Поле button_text[${index}]:`, input);
+                console.log(`   Значення button_text[${index}]:`, input.value);
+            });
+            
+            buttonLinks.forEach((input, index) => {
+                console.log(`   Поле button_link[${index}]:`, input);
+                console.log(`   Значення button_link[${index}]:`, input.value);
+            });
+            
+            for (let i = 0; i < buttonTexts.length; i++) {
+                const text = buttonTexts[i].value.trim();
+                const link = buttonLinks[i].value.trim();
+                
+                console.log(`   Кнопка ${i+1}: text='${text}', link='${link}'`);
+                
+                if (text && link) {
+                    buttons.push({
+                        text: text,
+                        url: link
+                    });
+                    console.log(`   ✅ Додано кнопку: ${text} -> ${link}`);
+                } else {
+                    console.log(`   ❌ Пропущено кнопку (порожня): text='${text}', link='${link}'`);
+                }
+            }
+            
+            const buttonsJson = JSON.stringify(buttons);
+            console.log('🔍 DEBUG: Створено JSON кнопок:', buttonsJson);
+            console.log('🔍 DEBUG: Кількість кнопок для відправки:', buttons.length);
+            
+            // Додаємо всі дані в FormData
+            formData.append('inline_buttons', buttonsJson);
+            formData.append('send_immediately', 'true');
+            
+            // Збираємо дані про фільтрацію користувачів
+            const userFilter = document.getElementById('user_filter').value;
+            formData.append('user_filter', userFilter);
+            
+            if (userFilter === 'status') {
+                const userStatus = document.getElementById('user_status');
+                const selectedStatuses = [];
+                for (let i = 0; i < userStatus.options.length; i++) {
+                    if (userStatus.options[i].selected) {
+                        selectedStatuses.push(userStatus.options[i].value);
+                    }
+                }
+                formData.append('user_status', selectedStatuses.join(','));
+                console.log('🔍 DEBUG: Фільтр по статусу:', selectedStatuses);
+            }
+            
+            // Збираємо дані про повторювання
+            const isRecurring = document.getElementById('is_recurring').checked;
+            if (isRecurring) {
+                formData.append('is_recurring', 'on');
+                
+                const recurringDays = document.getElementById('recurring_days');
+                const recurringTime = document.getElementById('recurring_time').value;
+                
+                console.log('🔍 DEBUG: Елемент recurring_days:', recurringDays);
+                console.log('🔍 DEBUG: Всі опції:', recurringDays.options);
+                console.log('🔍 DEBUG: Кількість опцій:', recurringDays.options.length);
+                
+                // Збираємо вибрані дні
+                const selectedDays = [];
+                for (let i = 0; i < recurringDays.options.length; i++) {
+                    const option = recurringDays.options[i];
+                    console.log(`🔍 DEBUG: Опція ${i}: value="${option.value}", text="${option.text}", selected=${option.selected}`);
+                    if (option.selected) {
+                        selectedDays.push(option.value);
+                        console.log(`✅ Додано вибраний день: ${option.value} (${option.text})`);
+                    }
+                }
+                
+                console.log('🔍 DEBUG: Всі вибрані дні:', selectedDays);
+                console.log('🔍 DEBUG: Рядок днів для FormData:', selectedDays.join(','));
+                
+                formData.append('recurring_days', selectedDays.join(','));
+                formData.append('recurring_time', recurringTime);
+                
+                console.log('🔍 DEBUG: Додано дані про повторювання:');
+                console.log('   is_recurring:', isRecurring);
+                console.log('   recurring_days:', selectedDays.join(','));
+                console.log('   recurring_time:', recurringTime);
+            }
+            
+            // Логуємо весь FormData
+            console.log('🔍 DEBUG: Всі дані FormData:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`   ${key}: ${value}`);
+            }
+            
+            // Відправляємо запит на створення та розсилку
+            console.log('🔍 DEBUG: Відправляємо запит на create_and_send_mailing_route');
+            fetch('{{ url_for("create_and_send_mailing_route") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Розсилка створена та запущена!');
+                    location.reload();
+                } else {
+                    alert('Помилка: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Помилка: ' + error);
+            });
+        }
+        
+        function toggleScheduleFields() {
+            const scheduleType = document.getElementById('schedule_type').value;
+            const scheduleDatetimeGroup = document.getElementById('schedule_datetime_group');
+            const scheduleBtn = document.querySelector('.schedule-btn');
+            const recurringSection = document.getElementById('recurring_section');
+            
+            if (scheduleType === 'immediate') {
+                scheduleDatetimeGroup.style.display = 'none';
+                scheduleBtn.style.display = 'none';
+                recurringSection.style.display = 'none';
+            } else if (scheduleType === 'scheduled') {
+                scheduleDatetimeGroup.style.display = 'block';
+                scheduleBtn.style.display = 'inline-block';
+                recurringSection.style.display = 'block';
+                setCurrentKyivTime();
+            }
+        }
+        
+        function setCurrentKyivTime() {
+            // Встановлюємо поточний час Києва (UTC+3)
+            const now = new Date();
+            const kyivOffset = 3; // UTC+3 для Києва
+            const kyivTime = new Date(now.getTime() + (kyivOffset * 60 * 60 * 1000));
+            
+            // Форматуємо для datetime-local
+            const year = kyivTime.getUTCFullYear();
+            const month = String(kyivTime.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(kyivTime.getUTCDate()).padStart(2, '0');
+            const hours = String(kyivTime.getUTCHours()).padStart(2, '0');
+            const minutes = String(kyivTime.getUTCMinutes()).padStart(2, '0');
+            
+            const datetimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+            document.getElementById('schedule_datetime').value = datetimeString;
+        }
+        
+        function createAndScheduleMailing() {
+            console.log('🔍 DEBUG: createAndScheduleMailing викликано');
+            
+            // Збираємо дані з форми
+            const formData = new FormData();
+            formData.append('mailing_name', document.getElementById('mailing_name').value);
+            formData.append('message_text', document.getElementById('message_text').value);
+            formData.append('media_type', document.getElementById('media_type').value);
+            formData.append('media_url', document.getElementById('media_url').value || '');
+            
+            // Збираємо кнопки
+            const buttonTexts = document.querySelectorAll('input[name="button_text[]"]');
+            const buttonLinks = document.querySelectorAll('input[name="button_link[]"]');
+            const buttons = [];
+            
+            console.log('🔍 DEBUG: createAndScheduleMailing - збираємо кнопки:');
+            console.log('   buttonTexts:', buttonTexts);
+            console.log('   buttonLinks:', buttonLinks);
+            console.log('   Кількість:', buttonTexts.length);
+            
+            // Перевіряємо кожне поле окремо
+            buttonTexts.forEach((input, index) => {
+                console.log(`   Поле button_text[${index}]:`, input);
+                console.log(`   Значення button_text[${index}]:`, input.value);
+            });
+            
+            buttonLinks.forEach((input, index) => {
+                console.log(`   Поле button_link[${index}]:`, input);
+                console.log(`   Значення button_link[${index}]:`, input.value);
+            });
+            
+            for (let i = 0; i < buttonTexts.length; i++) {
+                const text = buttonTexts[i].value.trim();
+                const link = buttonLinks[i].value.trim();
+                
+                console.log(`   Кнопка ${i+1}: text='${text}', link='${link}'`);
+                
+                if (text && link) {
+                    buttons.push({
+                        text: text,
+                        url: link
+                    });
+                    console.log(`   ✅ Додано кнопку: ${text} -> ${link}`);
+                } else {
+                    console.log(`   ❌ Пропущено кнопку (порожня): text='${text}', link='${link}'`);
+                }
+            }
+            
+            const buttonsJson = JSON.stringify(buttons);
+            console.log('🔍 DEBUG: Створено JSON кнопок:', buttonsJson);
+            console.log('🔍 DEBUG: Кількість кнопок для планування:', buttons.length);
+            
+            // Додаємо всі дані в FormData
+            formData.append('inline_buttons', buttonsJson);
+            
+            // Збираємо дані про фільтрацію користувачів
+            const userFilter = document.getElementById('user_filter').value;
+            formData.append('user_filter', userFilter);
+            
+            if (userFilter === 'status') {
+                const userStatus = document.getElementById('user_status');
+                const selectedStatuses = [];
+                for (let i = 0; i < userStatus.options.length; i++) {
+                    if (userStatus.options[i].selected) {
+                        selectedStatuses.push(userStatus.options[i].value);
+                    }
+                }
+                formData.append('user_status', selectedStatuses.join(','));
+                console.log('🔍 DEBUG: Фільтр по статусу:', selectedStatuses);
+            }
+            
+            // Логуємо весь FormData
+            console.log('🔍 DEBUG: Всі дані FormData для планування:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`   ${key}: ${value}`);
+            }
+            
+            // Збираємо дані планування
+            const scheduleType = document.getElementById('schedule_type').value;
+            const scheduleDatetime = document.getElementById('schedule_datetime').value;
+            
+            formData.append('schedule_type', scheduleType);
+            formData.append('schedule_datetime', scheduleDatetime);
+            
+            // Збираємо дані про повторювання
+            const isRecurring = document.getElementById('is_recurring').checked;
+            if (isRecurring) {
+                formData.append('is_recurring', 'on');
+                
+                const recurringDays = document.getElementById('recurring_days');
+                const recurringTime = document.getElementById('recurring_time').value;
+                
+                console.log('🔍 DEBUG: Елемент recurring_days:', recurringDays);
+                console.log('🔍 DEBUG: Всі опції:', recurringDays.options);
+                console.log('🔍 DEBUG: Кількість опцій:', recurringDays.options.length);
+                
+                // Збираємо вибрані дні
+                const selectedDays = [];
+                for (let i = 0; i < recurringDays.options.length; i++) {
+                    const option = recurringDays.options[i];
+                    console.log(`🔍 DEBUG: Опція ${i}: value="${option.value}", text="${option.text}", selected=${option.selected}`);
+                    if (option.selected) {
+                        selectedDays.push(option.value);
+                        console.log(`✅ Додано вибраний день: ${option.value} (${option.text})`);
+                    }
+                }
+                
+                console.log('🔍 DEBUG: Всі вибрані дні:', selectedDays);
+                console.log('🔍 DEBUG: Рядок днів для FormData:', selectedDays.join(','));
+                
+                formData.append('recurring_days', selectedDays.join(','));
+                formData.append('recurring_time', recurringTime);
+                
+                console.log('🔍 DEBUG: Додано дані про повторювання:');
+                console.log('   is_recurring:', isRecurring);
+                console.log('   recurring_days:', selectedDays.join(','));
+                console.log('   recurring_time:', recurringTime);
+            }
+            
+            // Відправляємо запит на створення та планування
+            console.log('🔍 DEBUG: Відправляємо запит на create_and_schedule_mailing_route');
+            fetch('{{ url_for("create_and_schedule_mailing_route") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Розсилка створена та запланована!');
+                    location.reload();
+                } else {
+                    alert('Помилка: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Помилка: ' + error);
+            });
+        }
+        
+        function toggleUserFilterFields() {
+            const userFilter = document.getElementById('user_filter').value;
+            const statusFilterGroup = document.getElementById('status_filter_group');
+            
+            // Скрываем все группы
+            statusFilterGroup.style.display = 'none';
+            
+            // Показываем нужную группу
+            if (userFilter === 'status') {
+                statusFilterGroup.style.display = 'block';
+            }
+        }
+        
+
+        
+        function toggleRecurringFields() {
+            const isRecurring = document.getElementById('is_recurring').checked;
+            const recurringFields = document.getElementById('recurring_fields');
+            const recurringDays = document.getElementById('recurring_days');
+            const recurringTime = document.getElementById('recurring_time');
+            
+            if (isRecurring) {
+                recurringFields.style.display = 'block';
+                recurringDays.setAttribute('required', 'required');
+                recurringTime.setAttribute('required', 'required');
+            } else {
+                recurringFields.style.display = 'none';
+                recurringDays.removeAttribute('required');
+                recurringTime.removeAttribute('required');
+            }
+        }
+        
+        function resendMailing(id, mailingName) {
+            if (confirm(`Ви впевнені, що хочете відправити розсилку "${mailingName}" знову?`)) {
+                window.location.href = `/resend_mailing/${id}`;
+            }
+        }
+        
+        function makeRecurring(id, mailingName) {
+            // Показуємо модальне вікно для налаштування повторюваної розсилки
+            const days = prompt('Введите дни недели через запятую (0-понедельник, 1-вторник, тощо):\nНапример: 0,4 для понедельника и пятницы');
+            if (days === null) return;
+            
+            const time = prompt('Введите время в формате HH:MM (например, 09:00):');
+            if (time === null) return;
+            
+            // Валідація
+            if (!days.trim() || !time.trim()) {
+                alert('Будь ласка, введіть дні та час!');
+                return;
+            }
+            
+            // Відправляємо запит
+            const formData = new FormData();
+            formData.append('is_recurring', 'true');
+            formData.append('recurring_days', days.trim());
+            formData.append('recurring_time', time.trim());
+            
+            fetch(`/toggle_recurring_mailing/${id}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Помилка при налаштуванні повторюваної розсилки!');
+                }
+            })
+            .catch(error => {
+                alert('Помилка: ' + error);
+            });
+        }
+        
+        function toggleRecurring(id, mailingName, isActive) {
+            const action = isActive ? 'вимкнути' : 'увімкнути';
+            if (confirm(`Ви впевнені, що хочете ${action} повторювання розсилки "${mailingName}"?`)) {
+                const formData = new FormData();
+                formData.append('is_recurring', (!isActive).toString());
+                
+                fetch(`/toggle_recurring_mailing/${id}`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Помилка при зміні налаштувань повторюваної розсилки!');
+                    }
+                })
+                .catch(error => {
+                    alert('Помилка: ' + error);
+                });
+            }
+        }
+        
+        function showTab(tabName) {
+            // Приховуємо всі вкладки
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Прибираємо активний клас з усіх кнопок
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Показуємо потрібну вкладку
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Активуємо кнопку
+            event.target.classList.add('active');
+        }
+        
+        // Функції для масових операцій
+        function resendAllSent() {
+            if (confirm('Ви впевнені, що хочете відправити всі надіслані розсилки знову?')) {
+                const sentMailings = document.querySelectorAll('#tab-sent .mailing-card, #tab-all .mailing-card');
+                let count = 0;
+                
+                sentMailings.forEach(card => {
+                    const resendBtn = card.querySelector('.resend-btn');
+                    if (resendBtn) {
+                        count++;
+                    }
+                });
+                
+                if (count > 0) {
+                    showLoading(`Відправляємо ${count} розсилок знову...`);
+                    
+                    // Симулюємо процес відправки
+                    setTimeout(() => {
+                        hideLoading();
+                        alert(`✅ Успішно відправлено ${count} розсилок знову!`);
+                        location.reload();
+                    }, 2000);
+                } else {
+                    alert('Немає надісланих розсилок для повторної відправки.');
+                }
+            }
+        }
+        
+        function showLoading(message) {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading-overlay';
+            loadingDiv.innerHTML = `
+                <div class="loading-content">
+                    <div class="spinner"></div>
+                    <p>${message}</p>
+                </div>
+            `;
+            document.body.appendChild(loadingDiv);
+        }
+        
+        function hideLoading() {
+            const loadingDiv = document.getElementById('loading-overlay');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+        
+        function makeAllRecurring() {
+            if (confirm('Ви впевнені, що хочете зробити всі надіслані розсилки повторюваними?')) {
+                const sentMailings = document.querySelectorAll('#tab-sent .mailing-card, #tab-all .mailing-card');
+                let count = 0;
+                
+                sentMailings.forEach(card => {
+                    const makeRecurringBtn = card.querySelector('.make-recurring-btn');
+                    if (makeRecurringBtn) {
+                        count++;
+                    }
+                });
+                
+                if (count > 0) {
+                    alert(`Буде налаштовано ${count} розсилок як повторювані. Вам потрібно буде вказати графік для кожної.`);
+                } else {
+                    alert('Немає надісланих розсилок для налаштування повторювання.');
+                }
+            }
+        }
+        
+        function sendAllScheduled() {
+            if (confirm('Вы уверены, что хотите отправить все запланированные рассылки сейчас?')) {
+                const scheduledMailings = document.querySelectorAll('#tab-scheduled .mailing-card');
+                let count = scheduledMailings.length;
+                
+                if (count > 0) {
+                    alert(`Буде отправлено ${count} запланированных рассылок сейчас.`);
+                    // Тут можна додати логіку для масової відправки
+                } else {
+                    alert('Немає запланированных рассылок для отправки.');
+                }
+            }
+        }
+        
+        function cancelAllScheduled() {
+            if (confirm('Вы уверены, что хотите отменить планирование всех рассылок?')) {
+                const scheduledMailings = document.querySelectorAll('#tab-scheduled .mailing-card');
+                let count = scheduledMailings.length;
+                
+                if (count > 0) {
+                    alert(`Буде отменено планирование ${count} рассылок.`);
+                    // Тут можна додати логіку для масового скасування
+                } else {
+                    alert('Немає запланированных рассылок для отмены.');
+                }
+            }
+        }
+        
+        function resendAllRecurring() {
+            if (confirm('Вы уверены, что хотите отправить все повторяющиеся рассылки снова?')) {
+                const recurringMailings = document.querySelectorAll('#tab-recurring .mailing-card');
+                let count = recurringMailings.length;
+                
+                if (count > 0) {
+                    alert(`Буде отправлено ${count} повторяющихся рассылок снова.`);
+                    // Тут можна додати логіку для масової відправки
+                } else {
+                    alert('Немає повторяющихся рассылок для отправки.');
+                }
+            }
+        }
+        
+        function disableAllRecurring() {
+            if (confirm('Вы уверены, что хотите отключить повторение всех рассылок?')) {
+                const recurringMailings = document.querySelectorAll('#tab-recurring .mailing-card');
+                let count = recurringMailings.length;
+                
+                if (count > 0) {
+                    alert(`Буде отключено повторение ${count} рассылок.`);
+                    // Тут можна додати логіку для масового вимкнення
+                } else {
+                    alert('Немає повторяющихся рассылок для отключения.');
+                }
+            }
+        }
+        
+        // Функція для фільтрації розсилок
+        function filterMailings(tabName) {
+            const searchInput = document.getElementById(`search-${tabName}`);
+            const filterSelect = document.getElementById(`filter-${tabName}`);
+            const mailingCards = document.querySelectorAll(`#tab-${tabName} .mailing-card`);
+            
+            const searchTerm = searchInput.value.toLowerCase();
+            const filterValue = filterSelect ? filterSelect.value : '';
+            
+            mailingCards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const text = card.querySelector('p').textContent.toLowerCase();
+                const status = card.querySelector('.status-active, .status-scheduled, .status-inactive');
+                const statusText = status ? status.textContent.toLowerCase() : '';
+                
+                let showCard = true;
+                
+                // Пошук по тексту
+                if (searchTerm && !title.includes(searchTerm) && !text.includes(searchTerm)) {
+                    showCard = false;
+                }
+                
+                // Фільтр по статусу
+                if (filterValue) {
+                    if (filterValue === 'sent' && !statusText.includes('надіслана')) {
+                        showCard = false;
+                    } else if (filterValue === 'scheduled' && !statusText.includes('запланована')) {
+                        showCard = false;
+                    } else if (filterValue === 'draft' && !statusText.includes('створена')) {
+                        showCard = false;
+                    } else if (filterValue === 'recurring') {
+                        const recurringIndicator = card.querySelector('p strong:contains("🔄 Повторювана")');
+                        if (!recurringIndicator) {
+                            showCard = false;
+                        }
+                    }
+                }
+                
+                card.style.display = showCard ? 'block' : 'none';
+            });
+            
+            // Оновлюємо лічильники
+            updateTabCounts();
+        }
+        
+        // Функція для оновлення лічильників вкладок
+        function updateTabCounts() {
+            const tabs = ['all', 'sent', 'scheduled', 'recurring'];
+            
+            tabs.forEach(tab => {
+                const visibleCards = document.querySelectorAll(`#tab-${tab} .mailing-card[style*="block"], #tab-${tab} .mailing-card:not([style*="none"])`);
+                const countElement = document.querySelector(`button[onclick="showTab('${tab}')"] .tab-count`);
+                
+                if (countElement) {
+                    countElement.textContent = `(${visibleCards.length})`;
+                }
+            });
+        }
+        
+        // Функція для підрахунку кількості розсилок у кожній вкладці
+        function countMailingsByType() {
+            // Підраховуємо надіслані розсилки
+            const sentCount = document.querySelectorAll('#tab-sent .mailing-card').length;
+            document.getElementById('sent-count').textContent = `(${sentCount})`;
+            
+            // Підраховуємо заплановані розсилки
+            const scheduledCount = document.querySelectorAll('#tab-scheduled .mailing-card').length;
+            document.getElementById('scheduled-count').textContent = `(${scheduledCount})`;
+            
+            // Підраховуємо повторювані розсилки
+            const recurringCount = document.querySelectorAll('#tab-recurring .mailing-card').length;
+            document.getElementById('recurring-count').textContent = `(${recurringCount})`;
+        }
+
+        // Ініціалізація при завантаженні сторінки
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleMediaFields();
+            toggleUserFilterFields(); // Ініціалізуємо фільтри користувачів
+            
+            // Логуємо початковий стан
+            console.log('🔍 DEBUG: Сторінка завантажена');
+            const container = document.getElementById('buttons-container');
+            console.log('   Контейнер кнопок:', container);
+            console.log('   Початкова кількість кнопок:', container.querySelectorAll('input[name="button_text[]"]').length);
+            
+            // Підраховуємо кількість розсилок у кожній вкладці
+            countMailingsByType();
+            
+            // Event listeners for start buttons
+            document.querySelectorAll('.start-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    startMailing(id);
+                });
+            });
+            
+            // Event listeners for delete buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const name = this.dataset.name;
+                    
+                    deleteMailing(id, name);
+                });
+            });
+            
+            // Event listeners for cancel schedule buttons
+            document.querySelectorAll('.cancel-schedule-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const name = this.dataset.name;
+                    
+                    cancelScheduledMailing(id, name);
+                });
+            });
+            
+            // Event listeners for resend buttons
+            document.querySelectorAll('.resend-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const name = this.dataset.name;
+                    
+                    resendMailing(id, name);
+                });
+            });
+            
+            // Event listeners for make recurring buttons
+            document.querySelectorAll('.make-recurring-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const name = this.dataset.name;
+                    
+                    makeRecurring(id, name);
+                });
+            });
+            
+            // Event listeners for toggle recurring buttons
+            document.querySelectorAll('.toggle-recurring-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const name = this.dataset.name;
+                    const isActive = this.dataset.active === 'true';
+                    
+                    toggleRecurring(id, name, isActive);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
