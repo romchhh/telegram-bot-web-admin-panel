@@ -10,7 +10,7 @@ from database.client_db import (
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database.settings_db import (get_start_message_config, create_settings_table, get_subscription_message,
                                 create_welcome_without_subscription_table, create_subscription_messages_table,
-                                get_channel_leave_config, create_mailings_table, create_recurring_mailings_table, create_admin_credentials_table, get_welcome_without_subscription, get_captcha_settings)
+                                get_channel_leave_config, create_mailings_table, create_recurring_mailings_table, create_admin_credentials_table, get_welcome_without_subscription, get_captcha_settings, get_channel_invite_link_by_chat_id)
 from keyboards.client_keyboards import get_subscription_message_keyboard, create_combined_keyboard, create_captcha_keyboard, create_inline_only_keyboard
 from database.start_params_db import create_start_params_table
 from utils.video_cache import send_video_with_caching
@@ -124,6 +124,7 @@ async def start(message: types.Message, state: FSMContext):
 async def get_media_id_start(message: types.Message, state: FSMContext):
     await message.answer("📤 Пожалуйста, скиньте медиа (фото, видео, документ, аудио), чтобы я мог получить его ID. Чтобы отменить, напишите /cancel")
     await state.set_state(MediaStates.waiting_for_media)
+
 
 @router.message(MediaStates.waiting_for_media, ~Command("cancel"))
 async def process_media_for_id(message: types.Message, state: FSMContext):
@@ -452,78 +453,117 @@ async def handle_chat_join_request(chat_join_request: types.ChatJoinRequest):
     chat = chat_join_request.chat
 
     try:
-        user_data = user_states.get(user_id, {})
-        current_state = user_data.get('state')
-
-        if current_state == UserStates.WAITING_FOR_CHANNEL_REQUEST:
-            captcha_settings = get_captcha_settings()
+        # Инициализируем состояние пользователя
+        if user_id not in user_states:
+            user_states[user_id] = {}
+        
+        # Устанавливаем состояние ожидания капчи сразу
+        user_states[user_id]['state'] = UserStates.WAITING_FOR_CAPTCHA
+        user_states[user_id]['chat_id'] = chat.id
+        
+        # Получаем настройки пригласительной ссылки для данного канала
+        invite_link_config = get_channel_invite_link_by_chat_id(chat.id)
+        
+        # Если есть сообщение для пригласительной ссылки, отправляем его
+        if invite_link_config and invite_link_config['message_text'].strip():
+            message_text = invite_link_config['message_text']
+            media_type = invite_link_config['media_type']
+            media_url = invite_link_config['media_url']
             
-            captcha_message = captcha_settings["captcha_message"]
-            captcha_media_type = captcha_settings["captcha_media_type"]
-            captcha_media_url = captcha_settings["captcha_media_url"]
-            captcha_button_text = captcha_settings["captcha_button_text"]
-            
-            captcha_keyboard = create_captcha_keyboard(captcha_button_text)
-            
-
-            sent_message = None
-            if captcha_media_type != "none" and captcha_media_url:
-                if captcha_media_type == "photo":
-                    if captcha_media_url.startswith(('http://', 'https://')):
-                        sent_message = await bot.send_photo(
+            try:
+                if media_type != "none" and media_url:
+                    if media_type == "photo":
+                        await bot.send_photo(
                             chat_id=user_id,
-                            photo=captcha_media_url,
-                            caption=captcha_message,
-                            parse_mode="HTML",
-                            reply_markup=captcha_keyboard
+                            photo=media_url,
+                            caption=message_text,
+                            parse_mode="HTML"
                         )
-                    else:
-                        sent_message = await bot.send_photo(
-                            chat_id=user_id,
-                            photo=captcha_media_url,
-                            caption=captcha_message,
-                            parse_mode="HTML",
-                            reply_markup=captcha_keyboard
+                    elif media_type == "video":
+                        cache_key = f"invite_video_{invite_link_config['id']}"
+                        await send_video_with_caching(
+                            types.Message(chat=types.Chat(id=user_id), from_user=types.User(id=user_id)), 
+                            media_url, 
+                            message_text, 
+                            None, 
+                            cache_key
                         )
-                elif captcha_media_type == "video":
-                    cache_key = "captcha_video"
-                    success = await send_video_with_caching(
-                        types.Message(chat=types.Chat(id=user_id), from_user=types.User(id=user_id)), 
-                        captcha_media_url, 
-                        captcha_message, 
-                        captcha_keyboard, 
-                        cache_key
+                else:
+                    await bot.send_message(
+                        chat_id=user_id,
+                        text=message_text,
+                        parse_mode="HTML"
                     )
-                    if success:
-                        try:
-                            updates = await bot.get_updates(offset=-1, limit=1)
-                            if updates:
-                                sent_message = updates[0].message
-                        except:
-                            pass
-            else:
-                sent_message = await bot.send_message(
-                    chat_id=user_id,
-                    text=captcha_message,
-                    parse_mode="HTML",
-                    reply_markup=captcha_keyboard
+            except Exception as e:
+                print(f"❌ Error sending invite link message: {e}")
+        
+        # Отправляем капчу (всегда)
+        captcha_settings = get_captcha_settings()
+        
+        captcha_message = captcha_settings["captcha_message"]
+        captcha_media_type = captcha_settings["captcha_media_type"]
+        captcha_media_url = captcha_settings["captcha_media_url"]
+        captcha_button_text = captcha_settings["captcha_button_text"]
+        
+        captcha_keyboard = create_captcha_keyboard(captcha_button_text)
+        
+        sent_message = None
+        if captcha_media_type != "none" and captcha_media_url:
+            if captcha_media_type == "photo":
+                if captcha_media_url.startswith(('http://', 'https://')):
+                    sent_message = await bot.send_photo(
+                        chat_id=user_id,
+                        photo=captcha_media_url,
+                        caption=captcha_message,
+                        parse_mode="HTML",
+                        reply_markup=captcha_keyboard
+                    )
+                else:
+                    sent_message = await bot.send_photo(
+                        chat_id=user_id,
+                        photo=captcha_media_url,
+                        caption=captcha_message,
+                        parse_mode="HTML",
+                        reply_markup=captcha_keyboard
+                    )
+            elif captcha_media_type == "video":
+                cache_key = "captcha_video"
+                success = await send_video_with_caching(
+                    types.Message(chat=types.Chat(id=user_id), from_user=types.User(id=user_id)), 
+                    captcha_media_url, 
+                    captcha_message, 
+                    captcha_keyboard, 
+                    cache_key
                 )
-            
-            if sent_message:
-                user_states[user_id]['captcha_message_id'] = sent_message.message_id
-            
-
-            user_states[user_id]['state'] = UserStates.WAITING_FOR_CAPTCHA
-            user_states[user_id]['chat_id'] = chat.id
-            
-            await bot.approve_chat_join_request(
-                chat_id=chat.id,
-                user_id=user_id
+                if success:
+                    try:
+                        updates = await bot.get_updates(offset=-1, limit=1)
+                        if updates:
+                            sent_message = updates[0].message
+                    except:
+                        pass
+        else:
+            sent_message = await bot.send_message(
+                chat_id=user_id,
+                text=captcha_message,
+                parse_mode="HTML",
+                reply_markup=captcha_keyboard
             )
-            return
+        
+        if sent_message:
+            user_states[user_id]['captcha_message_id'] = sent_message.message_id
+        
+        await bot.approve_chat_join_request(
+            chat_id=chat.id,
+            user_id=user_id
+        )
+        return
             
     except Exception as e:
         print(f"❌ Error in handle_chat_join_request: {e}")
+        print(f"User ID: {user_id}, Chat ID: {chat.id if chat else 'None'}")
+        import traceback
+        traceback.print_exc()
         return
 
 

@@ -425,10 +425,10 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="message_text">Сообщение при заявке на вступ:</label>
+                    <label for="message_text">Сообщение при заявке на вступ (необязательно):</label>
                     <textarea id="message_text" name="message_text" 
-                              placeholder="Введите сообщение для заявки на вступ в канал..." required></textarea>
-                    <small>Поддерживается HTML разметка</small>
+                              placeholder="Введите сообщение для заявки на вступ в канал (оставьте пустым, чтобы сразу переходить к капче)..."></textarea>
+                    <small>Поддерживается HTML разметка. Если оставить пустым, пользователь сразу перейдет к этапу капчи.</small>
                 </div>
                 
                 <div class="html-help">
@@ -474,29 +474,29 @@
                 <div class="invite-links-grid">
                     {% for link in invite_links %}
                         <div class="invite-link-card">
-                            <h3>{{ link[2] }}</h3>
-                            <p><strong>Ссылка:</strong> {{ link[1][:30] }}...</p>
-                            <p><strong>Сообщение:</strong> {{ link[3][:50] }}{% if link[3]|length > 50 %}...{% endif %}</p>
-                            <p><strong>Медиа:</strong> {{ link[4] }} {% if link[5] %}- {{ link[5][:30] }}...{% endif %}</p>
+                            <h3>{{ link.channel_name }}</h3>
+                            <p><strong>Ссылка:</strong> {{ link.invite_link[:30] }}...</p>
+                            <p><strong>Сообщение:</strong> {{ link.message_text[:50] }}{% if link.message_text|length > 50 %}...{% endif %}</p>
+                            <p><strong>Медиа:</strong> {{ link.media_type }} {% if link.media_url %}- {{ link.media_url[:30] }}...{% endif %}</p>
                             <p><strong>Статус:</strong> 
-                                <span class="{% if link[6] %}status-active{% else %}status-inactive{% endif %}">
-                                    {% if link[6] %}Активное{% else %}Неактивное{% endif %}
+                                <span class="{% if link.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                    {% if link.is_active %}Активное{% else %}Неактивное{% endif %}
                                 </span>
                             </p>
                             
                             <div class="invite-link-actions">
                                 <button class="edit-btn" 
-                                        data-id="{{ link[0] }}"
-                                        data-invite-link="{{ link[1]|e }}"
-                                        data-channel-name="{{ link[2]|e }}"
-                                        data-message-text="{{ link[3]|e }}"
-                                        data-media-type="{{ link[4]|e }}"
-                                        data-media-url="{{ link[5]|e }}">
+                                        data-id="{{ link.id }}"
+                                        data-invite-link="{{ link.invite_link|e }}"
+                                        data-channel-name="{{ link.channel_name|e }}"
+                                        data-message-text="{{ link.message_text|e }}"
+                                        data-media-type="{{ link.media_type|e }}"
+                                        data-media-url="{{ link.media_url|e }}">
                                     ✏️ Редактировать
                                 </button>
                                 <button class="delete-btn" 
-                                        data-id="{{ link[0] }}"
-                                        data-channel-name="{{ link[2]|e }}">
+                                        data-id="{{ link.id }}"
+                                        data-channel-name="{{ link.channel_name|e }}">
                                     🗑️ Удалить
                                 </button>
                             </div>
@@ -520,6 +520,7 @@
             <p><strong>Медиа файлы:</strong> Можно добавить фото или видео до сообщения.</p>
             <p><strong>Важно:</strong> Бот автоматически принимает заявки на вступ в канал и отправляет настроенное сообщение пользователю.</p>
             <p><strong>🤖 Капча:</strong> Капча "Я не робот" настраивается глобально в разделе <a href="{{ url_for('captcha_settings') }}" style="color: #667eea; text-decoration: none; font-weight: 600;">Настройка капчи</a> и применяется ко всем пригласительным ссылкам.</p>
+            <p><strong>📝 Пустое сообщение:</strong> Если оставить поле сообщения пустым, пользователь сразу перейдет к этапу капчи без дополнительных сообщений.</p>
         </div>
     </div>
     
@@ -542,8 +543,8 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="edit_message_text">Сообщение при заявке на вступ:</label>
-                    <textarea id="edit_message_text" name="message_text" required></textarea>
+                    <label for="edit_message_text">Сообщение при заявке на вступ (необязательно):</label>
+                    <textarea id="edit_message_text" name="message_text" placeholder="Введите сообщение или оставьте пустым для прямого перехода к капче"></textarea>
                 </div>
                 
                 <div class="form-row">

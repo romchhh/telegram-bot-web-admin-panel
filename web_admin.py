@@ -23,6 +23,22 @@ from aiogram import Bot
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 
+# Функция для получения отображения этапа с ID
+def get_stage_id_display(stage_name):
+    stage_map = {
+        'Нажал старт': '1 - Нажал старт',
+        'Прошел капчу': '2 - Прошел капчу',
+        'Посмотрел ответы': '3 - Посмотрел ответы',
+        'Посмотрел приватный урок': '4 - Посмотрел приватный урок',
+        'Посмотрел тарифы': '5 - Посмотрел тарифы',
+        'Посмотрел тарифы одежда': '6 - Посмотрел тарифы одежда',
+        'Посмотрел тарифы техника': '7 - Посмотрел тарифы техника',
+        'Нажал оплатить техника': '8 - Нажал оплатить техника',
+        'Нажал оплатить одежда': '9 - Нажал оплатить одежда',
+        'Оплатил одежду': '10 - Оплатил одежду',
+        'Оплатил технику': '11 - Оплатил технику'
+    }
+    return stage_map.get(stage_name, stage_name)
 
 @app.template_filter('from_json')
 def from_json_filter(value):
@@ -75,11 +91,23 @@ def welcome_settings():
 @login_required
 def channel_join_settings():
     settings = load_settings()
-    invite_links = get_channel_invite_links()
+    invite_links_raw = get_channel_invite_links()
     
-    # Отримуємо налаштування капчі для кожного посилання
-    for link in invite_links:
-        link['captcha_config'] = get_captcha_config(link['id'])
+    # Преобразуем кортежи в словари для удобства работы
+    invite_links = []
+    for link_tuple in invite_links_raw:
+        link_dict = {
+            'id': link_tuple[0],
+            'invite_link': link_tuple[1],
+            'channel_name': link_tuple[2],
+            'message_text': link_tuple[3],
+            'media_type': link_tuple[4],
+            'media_url': link_tuple[5],
+            'is_active': link_tuple[6]
+        }
+        # Получаем настройки капчи для каждого посилання
+        link_dict['captcha_config'] = get_captcha_config(link_dict['id'])
+        invite_links.append(link_dict)
     
     return render_template('channel_join_settings.html', settings=settings, invite_links=invite_links)
 
@@ -147,7 +175,8 @@ def users_list():
                          current_page=current_page, 
                          total_pages=total_pages, 
                          total_users=total_users,
-                         per_page=per_page)
+                         per_page=per_page,
+                         get_stage_id_display=get_stage_id_display)
 
 @app.route('/start-params', methods=['GET', 'POST'])
 @login_required
@@ -554,8 +583,8 @@ def add_channel_invite_link_route():
     media_type = request.form['media_type']
     media_url = request.form['media_url'].strip()
     
-    if not invite_link or not channel_name or not message_text:
-        flash('Всі поля повинні бути заповнені!', 'error')
+    if not invite_link or not channel_name:
+        flash('Пригласительная ссылка и название канала обязательны!', 'error')
         return redirect(url_for('channel_join_settings'))
     
     if media_type != "none" and not media_url:
@@ -583,8 +612,8 @@ def edit_channel_invite_link_route(link_id):
     media_type = request.form['media_type']
     media_url = request.form['media_url'].strip()
     
-    if not invite_link or not channel_name or not message_text:
-        flash('Всі поля повинні бути заповнені!', 'error')
+    if not invite_link or not channel_name:
+        flash('Пригласительная ссылка и название канала обязательны!', 'error')
         return redirect(url_for('channel_join_settings'))
     
     if media_type != "none" and not media_url:

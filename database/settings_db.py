@@ -439,6 +439,33 @@ def delete_channel_invite_link(link_id: int) -> bool:
         conn.commit()
         return success
 
+def get_channel_invite_link_by_chat_id(chat_id: int) -> dict:
+    """Получить настройки пригласительной ссылки по ID канала"""
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        
+        # Предполагаем, что пригласительная ссылка содержит ID канала
+        # Можно также искать по invite_link, если ID канала хранится в другом поле
+        cursor.execute('''
+            SELECT id, invite_link, channel_name, message_text, media_type, media_url, is_active
+            FROM channel_invite_links 
+            WHERE is_active = 1
+            LIMIT 1
+        ''')
+        
+        result = cursor.fetchone()
+        if result:
+            return {
+                'id': result[0],
+                'invite_link': result[1],
+                'channel_name': result[2],
+                'message_text': result[3],
+                'media_type': result[4],
+                'media_url': result[5],
+                'is_active': result[6]
+            }
+        return None
+
 
 def create_mailings_table():
     with get_connection() as conn:
@@ -579,7 +606,7 @@ def add_mailing(name: str, message_text: str, media_type: str = "none",
         return mailing_id
 
 
-def get_all_mailings() -> List[Tuple]:
+def get_all_mailings() -> List[Dict]:
     with get_connection() as conn:
         cursor = conn.cursor()
         
@@ -596,7 +623,6 @@ def get_all_mailings() -> List[Tuple]:
                 ORDER BY m.created_at DESC
             ''')
             results = cursor.fetchall()
-            return results
         except Exception as e:
             try:
                 cursor.execute('''
@@ -608,9 +634,37 @@ def get_all_mailings() -> List[Tuple]:
                 FROM mailings ORDER BY created_at DESC
                 ''')
                 results = cursor.fetchall()
-                return results
             except Exception as e2:
                 return []
+        
+        # Преобразуем кортежи в словари
+        mailings = []
+        for row in results:
+            mailing = {
+                "id": row[0],
+                "name": row[1],
+                "message_text": row[2],
+                "media_type": row[3],
+                "media_url": row[4],
+                "inline_buttons": row[5],
+                "is_active": row[6],
+                "created_at": row[7],
+                "sent_at": row[8],
+                "users_count": row[9],
+                "scheduled_at": row[10],
+                "is_scheduled": row[11],
+                "status": row[12],
+                "is_recurring": row[13],
+                "recurring_days": row[14],
+                "recurring_time": row[15],
+                "next_scheduled_at": row[16],
+                "user_filter": row[17] if len(row) > 17 else "all",
+                "user_status": row[18] if len(row) > 18 else None,
+                "start_param_filter": row[19] if len(row) > 19 else None
+            }
+            mailings.append(mailing)
+        
+        return mailings
 
 
 def get_mailing_by_id(mailing_id: int) -> Optional[Dict[str, Any]]:

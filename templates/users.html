@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Список пользователей</title>
+    <title>Список пользователей - Этапы прохождения</title>
     <style>
         * {
             margin: 0;
@@ -228,6 +228,24 @@
             border-radius: 6px;
             font-size: 0.9rem;
             font-weight: 500;
+            cursor: help;
+            position: relative;
+        }
+        
+        .status:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 1000;
+            margin-bottom: 5px;
         }
         
         .no-status {
@@ -338,6 +356,21 @@
             margin-bottom: 1rem;
         }
         
+        .modal-body .start-param-display {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .modal-body .no-start-param {
+            color: #9e9e9e;
+            font-style: italic;
+        }
+        
         .modal-actions {
             display: flex;
             gap: 1rem;
@@ -398,7 +431,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>👥 Список пользователей</h1>
+        <h1>👥 Список пользователей - Этапы прохождения</h1>
         <div class="nav-buttons">
             <a href="{{ url_for('admin_panel') }}" class="nav-btn">🏠 Главная</a>
             <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
@@ -440,7 +473,7 @@
                             <th>Дата регистрации</th>
                             <th>Последняя активность</th>
                             <th>Стартовый параметр</th>
-                            <th>Статус</th>
+                            <th>Этап (с ID)</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
@@ -460,7 +493,8 @@
                             </td>
                             <td>
                                 {% if user[5] %}
-                                    <span class="status">{{ user[5] }}</span>
+                                    {% set stage_id = get_stage_id_display(user[5]) %}
+                                    <span class="status">{{ stage_id }}</span>
                                 {% else %}
                                     <span class="no-status">—</span>
                                 {% endif %}
@@ -468,8 +502,9 @@
                             <td>
                                 <button type="button" class="btn btn-sm btn-info status-change-btn" 
                                         data-user-id="{{ user[0] }}" 
-                                        data-current-status="{{ user[5] or '' }}">
-                                    Изменить статус
+                                        data-current-status="{{ user[5] or '' }}"
+                                        data-start-param="{{ user[4] or '' }}">
+                                    Изменить этап
                                 </button>
                             </td>
                         </tr>
@@ -517,10 +552,25 @@
             <p><strong>Имя пользователя:</strong> Username пользователя (если указан)</p>
             <p><strong>Дата регистрации:</strong> Когда пользователь впервые использовал бота</p>
             <p><strong>Последняя активность:</strong> Время последнего взаимодействия с ботом</p>
-            <p><strong>Стартовый параметр:</strong> Параметр, с которым пользователь запустил бота</p>
-            <p><strong>Статус:</strong> Текущий статус пользователя в системе</p>
-            <p><strong>Действия:</strong> Возможность изменить статус пользователя</p>
+            <p><strong>Стартовый параметр:</strong> Параметр, с которым пользователь запустил бота (например: vid1, metka и т.д.)</p>
+            <p><strong>Этап:</strong> Текущий этап прохождения пользователя в системе (с ID для удобства)</p>
+            <p><strong>Действия:</strong> Возможность изменить этап пользователя</p>
             <p><strong>Пагинация:</strong> На каждой странице отображается до {{ per_page }} пользователей</p>
+            
+            <h3 style="margin-top: 1.5rem; color: #667eea;">📋 Этапы прохождения:</h3>
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <p><strong>1 - Нажал старт:</strong> Пользователь запустил бота</p>
+                <p><strong>2 - Прошел капчу:</strong> Пользователь успешно прошел проверку</p>
+                <p><strong>3 - Посмотрел ответы:</strong> Пользователь ознакомился с ответами</p>
+                <p><strong>4 - Приватный урок:</strong> Пользователь просмотрел приватный урок</p>
+                <p><strong>5 - Выбор тарифа:</strong> Пользователь ознакомился с тарифами</p>
+                <p><strong>6 - Тарифы одежда:</strong> Пользователь посмотрел тарифы на одежду</p>
+                <p><strong>7 - Тарифы техника:</strong> Пользователь посмотрел тарифы на технику</p>
+                <p><strong>8 - Оплата техника:</strong> Пользователь нажал кнопку оплаты техники</p>
+                <p><strong>9 - Оплата одежда:</strong> Пользователь нажал кнопку оплаты одежды</p>
+                <p><strong>10 - Оплатил одежду:</strong> Пользователь успешно оплатил тариф на одежду</p>
+                <p><strong>11 - Оплатил технику:</strong> Пользователь успешно оплатил тариф на технику</p>
+            </div>
         </div>
     </div>
     
@@ -528,28 +578,29 @@
     <div id="statusModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Изменить статус пользователя</h3>
+                <h3>Изменить этап пользователя</h3>
                 <span class="close" onclick="closeStatusModal()">&times;</span>
             </div>
             <div class="modal-body">
                 <p><strong>ID пользователя:</strong> <span id="modalUserId"></span></p>
-                <p><strong>Текущий статус:</strong> <span id="modalCurrentStatus"></span></p>
+                <p><strong>Стартовый параметр:</strong> <span id="modalStartParam"></span></p>
+                <p><strong>Текущий этап:</strong> <span id="modalCurrentStatus"></span></p>
                 
                 <div class="form-group">
-                    <label for="newStatusSelect">Новый статус:</label>
+                    <label for="newStatusSelect">Новый этап:</label>
                     <select id="newStatusSelect" class="status-select">
-                        <option value="">Выберите статус</option>
-                        <option value="Нажал старт">Нажал старт</option>
-                        <option value="Прошел капчу">Прошел капчу</option>
-                        <option value="Посмотрел ответы">Посмотрел ответы</option>
-                        <option value="Посмотрел приватный урок">Посмотрел приватный урок</option>
-                        <option value="Посмотрел тарифы">Посмотрел тарифы</option>
-                        <option value="Посмотрел тарифы одежда">Посмотрел тарифы одежда</option>
-                        <option value="Посмотрел тарифы техника">Посмотрел тарифы техника</option>
-                        <option value="Нажал оплатить техника">Нажал оплатить техника</option>
-                        <option value="Нажал оплатить одежда">Нажал оплатить одежда</option>
-                        <option value="Оплатил одежду">Оплатил одежду</option>
-                        <option value="Оплатил технику">Оплатил технику</option>
+                        <option value="">Выберите этап</option>
+                        <option value="Нажал старт" data-id="1">1 - Нажал старт</option>
+                        <option value="Прошел капчу" data-id="2">2 - Прошел капчу</option>
+                        <option value="Посмотрел ответы" data-id="3">3 - Посмотрел ответы</option>
+                        <option value="Посмотрел приватный урок" data-id="4">4 - Посмотрел приватный урок</option>
+                        <option value="Посмотрел тарифы" data-id="5">5 - Посмотрел тарифы</option>
+                        <option value="Посмотрел тарифы одежда" data-id="6">6 - Посмотрел тарифы одежда</option>
+                        <option value="Посмотрел тарифы техника" data-id="7">7 - Посмотрел тарифы техника</option>
+                        <option value="Нажал оплатить техника" data-id="8">8 - Нажал оплатить техника</option>
+                        <option value="Нажал оплатить одежда" data-id="9">9 - Нажал оплатить одежда</option>
+                        <option value="Оплатил одежду" data-id="10">10 - Оплатил одежду</option>
+                        <option value="Оплатил технику" data-id="11">11 - Оплатил технику</option>
                     </select>
                 </div>
                 
@@ -564,9 +615,28 @@
     <script>
         let currentUserId = null;
         
-        function openStatusModal(userId, currentStatus) {
+        // Функция для получения ID этапа по названию
+        function getStageId(stageName) {
+            const stageMap = {
+                'Нажал старт': 1,
+                'Прошел капчу': 2,
+                'Посмотрел ответы': 3,
+                'Посмотрел приватный урок': 4,
+                'Посмотрел тарифы': 5,
+                'Посмотрел тарифы одежда': 6,
+                'Посмотрел тарифы техника': 7,
+                'Нажал оплатить техника': 8,
+                'Нажал оплатить одежда': 9,
+                'Оплатил одежду': 10,
+                'Оплатил технику': 11
+            };
+            return stageMap[stageName] || '?';
+        }
+        
+        function openStatusModal(userId, currentStatus, startParam) {
             currentUserId = userId;
             document.getElementById('modalUserId').textContent = userId;
+            document.getElementById('modalStartParam').textContent = startParam || 'Не указан';
             document.getElementById('modalCurrentStatus').textContent = currentStatus || 'Не установлен';
             document.getElementById('newStatusSelect').value = '';
             document.getElementById('statusModal').style.display = 'block';
@@ -581,7 +651,7 @@
             const newStatus = document.getElementById('newStatusSelect').value;
             
             if (!newStatus) {
-                alert('Пожалуйста, выберите новый статус');
+                alert('Пожалуйста, выберите новый этап');
                 return;
             }
             
@@ -600,11 +670,14 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Обновляем статус в таблице без перезагрузки
+                    // Обновляем этап в таблице без перезагрузки
                     const statusCell = document.querySelector(`tr[data-user-id="${currentUserId}"] td:nth-child(6) span`);
                     if (statusCell) {
-                        statusCell.textContent = newStatus;
+                        // Получаем ID выбранного этапа
+                        const stageId = getStageId(newStatus);
+                        statusCell.textContent = `${stageId} - ${newStatus}`;
                         statusCell.className = 'status';
+                        statusCell.title = `ID: ${stageId}`;
                     }
                     
                     // Показываем уведомление
@@ -615,7 +688,7 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showNotification('Произошла ошибка при обновлении статуса', 'error');
+                showNotification('Произошла ошибка при обновлении этапа', 'error');
             }
         }
         
@@ -644,9 +717,26 @@
             if (event.target.classList.contains('status-change-btn')) {
                 const userId = event.target.getAttribute('data-user-id');
                 const currentStatus = event.target.getAttribute('data-current-status');
-                openStatusModal(userId, currentStatus);
+                const startParam = event.target.getAttribute('data-start-param');
+                openStatusModal(userId, currentStatus, startParam);
             }
         });
+        
+        // Инициализация ID для всех существующих статусов при загрузке страницы
+        function initializeStageIds() {
+            const statusCells = document.querySelectorAll('.status');
+            statusCells.forEach(cell => {
+                const stageName = cell.textContent;
+                const stageId = getStageId(stageName);
+                if (stageId !== '?') {
+                    cell.textContent = `${stageId} - ${stageName}`;
+                }
+                cell.title = `ID: ${stageId}`;
+            });
+        }
+        
+        // Запускаем инициализацию после загрузки страницы
+        document.addEventListener('DOMContentLoaded', initializeStageIds);
     </script>
 </body>
 </html>

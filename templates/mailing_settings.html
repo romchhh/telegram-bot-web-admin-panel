@@ -920,17 +920,17 @@
                     <div class="form-group" id="status_filter_group" style="display: none;">
                         <label for="user_status">Статус пользователей:</label>
                         <select id="user_status" name="user_status" multiple>
-                            <option value="Нажал старт">Нажал старт</option>
-                            <option value="Прошел капчу">Прошел капчу</option>
-                            <option value="Посмотрел ответы">Посмотрел ответы</option>
-                            <option value="Посмотрел приватный урок">Посмотрел приватный урок</option>
-                            <option value="Посмотрел тарифы">Посмотрел тарифы</option>
-                            <option value="Посмотрел тарифы одежда">Посмотрел тарифы одежда</option>
-                            <option value="Посмотрел тарифы техника">Посмотрел тарифы техника</option>
-                            <option value="Нажал оплатить техника">Нажал оплатить техника</option>
-                            <option value="Нажал оплатить одежда">Нажал оплатить одежда</option>
-                            <option value="Оплатил одежду">Оплатил одежду</option>
-                            <option value="Оплатил технику">Оплатил технику</option>
+                            <option value="Нажал старт">1  Нажал старт</option>
+                            <option value="Прошел капчу">2 Прошел капчу</option>
+                            <option value="Посмотрел ответы">3 Посмотрел ответы</option>
+                            <option value="Посмотрел приватный урок">4 Посмотрел приватный урок</option>
+                            <option value="Посмотрел тарифы">5 Посмотрел тарифы</option>
+                            <option value="Посмотрел тарифы одежда">6 Посмотрел тарифы одежда</option>
+                            <option value="Посмотрел тарифы техника">7 Посмотрел тарифы техника</option>
+                            <option value="Нажал оплатить техника">8 Нажал оплатить техника</option>
+                            <option value="Нажал оплатить одежда">9 Нажал оплатить одежда</option>
+                            <option value="Оплатил одежду">10 Оплатил одежду</option>
+                            <option value="Оплатил технику">11 Оплатил технику</option>
                         </select>
                         <small>Выберите один или несколько статусов (Ctrl+Click для множественного выбора)</small>
                     </div>
@@ -1004,103 +1004,103 @@
                 {% if mailings %}
                     <div class="mailings-grid">
                         {% for mailing in mailings %}
-                            <!-- DEBUG: Рассылка {{ loop.index }}: ID={{ mailing[0] }}, is_active={{ mailing[6] }}, is_scheduled={{ mailing[11] }}, is_recurring={{ mailing[13] if mailing|length > 13 else 'N/A' }}, scheduled_at={{ mailing[10] }}, next_scheduled_at={{ mailing[16] if mailing|length > 16 else 'N/A' }} -->
+                            <!-- DEBUG: Рассылка {{ loop.index }}: ID={{ mailing.id }}, is_active={{ mailing.is_active }}, is_scheduled={{ mailing.is_scheduled }}, is_recurring={{ mailing.is_recurring }}, scheduled_at={{ mailing.scheduled_at }}, next_scheduled_at={{ mailing.next_scheduled_at }} -->
                             <div class="mailing-card">
-                                <h3>{{ mailing[1] }}</h3>
-                                <p><strong>Текст:</strong> {{ mailing[2][:50] }}{% if mailing[2]|length > 50 %}...{% endif %}</p>
-                                <p><strong>Медиа:</strong> {{ mailing[3] }} 
-                                {% if mailing[4] %}
-                                    {% if mailing[4].startswith(('http://', 'https://')) %}
-                                        - <span class="media-url">URL: {{ mailing[4][:30] }}...</span>
+                                <h3>{{ mailing.name }}</h3>
+                                <p><strong>Текст:</strong> {{ mailing.message_text[:50] }}{% if mailing.message_text|length > 50 %}...{% endif %}</p>
+                                <p><strong>Медиа:</strong> {{ mailing.media_type }} 
+                                {% if mailing.media_url %}
+                                    {% if mailing.media_url.startswith(('http://', 'https://')) %}
+                                        - <span class="media-url">URL: {{ mailing.media_url[:30] }}...</span>
                                     {% else %}
-                                        - <span class="media-file-id">File ID: {{ mailing[4][:20] }}...</span>
+                                        - <span class="media-file-id">File ID: {{ mailing.media_url[:20] }}...</span>
                                     {% endif %}
                                 {% endif %}
                                 </p>
-                                <p><strong>Кнопки:</strong> {{ mailing[5] if mailing[5] else 'Без кнопок' }}</p>
+                                <p><strong>Кнопки:</strong> {{ mailing.inline_buttons if mailing.inline_buttons else 'Без кнопок' }}</p>
                                 <p><strong>Статус:</strong> 
-                                    {% if mailing[6] %}
+                                    {% if mailing.is_active %}
                                         <span class="status-active">✅ Отправлена</span>
-                                    {% elif mailing[10] and mailing[11] %}
-                                        <span class="status-scheduled">📅 Запланирована на {{ mailing[10][:16] }}</span>
-                                        {% if mailing[10] %}
-                                            <br><small>📅 Запланировано на: {{ mailing[10][:16] }} (Киев)</small>
+                                    {% elif mailing.scheduled_at and mailing.is_scheduled %}
+                                        <span class="status-scheduled">📅 Запланирована на {{ mailing.scheduled_at[:16] }}</span>
+                                        {% if mailing.scheduled_at %}
+                                            <br><small>📅 Запланировано на: {{ mailing.scheduled_at[:16] }} (Киев)</small>
                                         {% endif %}
                                     {% else %}
                                         <span class="status-inactive">📝 Создана</span>
                                     {% endif %}
                                 </p>
                                 
-                                {% if mailing|length > 13 and mailing[13] %}
+                                {% if mailing.is_recurring %}
                                 <p><strong>🔄 Повторяющаяся:</strong> 
                                     <span class="status-active">✅ Активна</span>
-                                    <!-- DEBUG: mailing[14] = {{ mailing[14] if mailing|length > 14 else 'N/A' }} -->
-                                    {% if mailing|length > 14 and mailing[14] %}
+                                    <!-- DEBUG: recurring_days = {{ mailing.recurring_days }} -->
+                                    {% if mailing.recurring_days %}
                                         <br><small>📅 Дни недели: 
                                             {% set days_map = {0: 'Понедельник', 1: 'Вторник', 2: 'Среда', 3: 'Четверг', 4: 'Пятница', 5: 'Суббота', 6: 'Воскресенье'} %}
-                                            <!-- DEBUG: Разбиваем строку "{{ mailing[14] }}" на дни -->
-                                            {% for day in mailing[14].split(',') %}
+                                            <!-- DEBUG: Разбиваем строку "{{ mailing.recurring_days }}" на дни -->
+                                            {% for day in mailing.recurring_days.split(',') %}
                                                 <!-- DEBUG: День {{ loop.index }}: "{{ day }}" -> {{ days_map[day|int] }} -->
                                                 {{ days_map[day|int] }}{% if not loop.last %}, {% endif %}
                                             {% endfor %}
                                         </small>
                                     {% endif %}
-                                    {% if mailing|length > 15 and mailing[15] %}
-                                        <br><small>⏰ Время отправки: {{ mailing[15] }} (Киев)</small>
+                                    {% if mailing.recurring_time %}
+                                        <br><small>⏰ Время отправки: {{ mailing.recurring_time }} (Киев)</small>
                                     {% endif %}
                                 </p>
                                 {% endif %}
                                 
-                                <p><strong>Создано:</strong> {{ mailing[7] }}</p>
+                                <p><strong>Создано:</strong> {{ mailing.created_at }}</p>
                                 <p><strong>Отправлено:</strong> 
-                                    {% if mailing[8] %}
-                                        {{ mailing[8] }} ({{ mailing[9] }} пользователей)
+                                    {% if mailing.sent_at %}
+                                        {{ mailing.sent_at }} ({{ mailing.users_count }} пользователей)
                                     {% else %}
                                         Не отправлялась
                                     {% endif %}
                                 </p>
-                                <p><strong>Пользователей:</strong> {{ mailing[9] if mailing[9] else '0' }}</p>
+                                <p><strong>Пользователей:</strong> {{ mailing.users_count if mailing.users_count else '0' }}</p>
                                 
-                                {% if mailing|length > 17 and mailing[17] and mailing[17] != 'all' %}
+                                {% if mailing.user_filter and mailing.user_filter != 'all' %}
                                 <p><strong>Фильтр пользователей:</strong> 
-                                    {% if mailing[17] == 'status' %}
-                                        <span class="status-filter">По статусу: {{ mailing[18] if mailing[18] else 'Не указан' }}</span>
+                                    {% if mailing.user_filter == 'status' %}
+                                        <span class="status-filter">По статусу: {{ mailing.user_status if mailing.user_status else 'Не указан' }}</span>
                                     {% endif %}
                                 </p>
                                 {% endif %}
                                 
                                 <div class="mailing-actions">
-                                    {% if not mailing[6] and not mailing[11] %}
-                                        <button class="start-btn" data-id="{{ mailing[0] }}">
+                                    {% if not mailing.is_active and not mailing.is_scheduled %}
+                                        <button class="start-btn" data-id="{{ mailing.id }}">
                                             🚀 Отправить
                                         </button>
                                     {% endif %}
                                     
-                                    {% if mailing[11] and not mailing[6] %}
-                                        <button class="cancel-schedule-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                    {% if mailing.is_scheduled and not mailing.is_active %}
+                                        <button class="cancel-schedule-btn" data-id="{{ mailing.id }}" data-name="{{ mailing.name|e }}">
                                             ❌ Отменить планирование
                                         </button>
                                     {% endif %}
                                     
-                                    {% if mailing[6] %}
-                                        <button class="resend-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                    {% if mailing.is_active %}
+                                        <button class="resend-btn" data-id="{{ mailing.id }}" data-name="{{ mailing.name|e }}">
                                             🔄 Отправить снова
                                         </button>
                                     {% endif %}
                                     
-                                    {% if mailing[6] and not mailing[13] %}
-                                        <button class="make-recurring-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                    {% if mailing.is_active and not mailing.is_recurring %}
+                                        <button class="make-recurring-btn" data-id="{{ mailing.id }}" data-name="{{ mailing.name|e }}">
                                             🔄 Сделать повторяющейся
                                         </button>
                                     {% endif %}
                                     
-                                    {% if mailing|length > 13 and mailing[13] %}
-                                        <button class="toggle-recurring-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}" data-active="true">
+                                    {% if mailing.is_recurring %}
+                                        <button class="toggle-recurring-btn" data-id="{{ mailing.id }}" data-name="{{ mailing.name|e }}" data-active="true">
                                             🔄 Выключить повторение
                                         </button>
                                     {% endif %}
 
-                                    <a href="{{ url_for('edit_mailing', mailing_id=mailing[0]) }}" class="edit-btn" style="
+                                    <a href="{{ url_for('edit_mailing', mailing_id=mailing.id) }}" class="edit-btn" style="
                                         background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
                                         color: white;
                                         border: none;
@@ -1116,8 +1116,8 @@
                                     </a>
 
                                     <button class="delete-btn" 
-                                            data-id="{{ mailing[0] }}"
-                                            data-name="{{ mailing[1]|e }}">
+                                            data-id="{{ mailing.id }}"
+                                            data-name="{{ mailing.name|e }}">
                                         🗑️ Удалить
                                     </button>
                                 </div>
@@ -1136,7 +1136,7 @@
             <div id="tab-sent" class="tab-content">
                 {% set sent_mailings = [] %}
                 {% for mailing in mailings %}
-                    {% if mailing[6] == 1 %}
+                    {% if mailing.is_active %}
                         {% set _ = sent_mailings.append(mailing) %}
                     {% endif %}
                 {% endfor %}
@@ -1146,23 +1146,23 @@
                     <div class="mailings-grid">
                         {% for mailing in sent_mailings %}
                             <div class="mailing-card sent-card">
-                                <h3>{{ mailing[1] }}</h3>
-                                <p><strong>Текст:</strong> {{ mailing[2][:50] }}{% if mailing[2]|length > 50 %}...{% endif %}</p>
-                                <p><strong>Отправлено:</strong> {{ mailing[8] }} ({{ mailing[9] }} пользователей)</p>
-                                <p><strong>Создано:</strong> {{ mailing[7] }}</p>
+                                <h3>{{ mailing.name }}</h3>
+                                <p><strong>Текст:</strong> {{ mailing.message_text[:50] }}{% if mailing.message_text|length > 50 %}...{% endif %}</p>
+                                <p><strong>Отправлено:</strong> {{ mailing.sent_at }} ({{ mailing.users_count }} пользователей)</p>
+                                <p><strong>Создано:</strong> {{ mailing.created_at }}</p>
                                 
                                 <div class="mailing-actions">
-                                    <button class="resend-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                    <button class="resend-btn" data-id="{{ mailing.id }}" data-name="{{ mailing.name|e }}">
                                         🔄 Отправить снова
                                     </button>
                                     
-                                    {% if not mailing[13] %}
-                                        <button class="make-recurring-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                    {% if not mailing.is_recurring %}
+                                        <button class="make-recurring-btn" data-id="{{ mailing.id }}" data-name="{{ mailing.name|e }}">
                                             🔄 Сделать повторяющейся
                                         </button>
                                     {% endif %}
                                     
-                                    <a href="{{ url_for('edit_mailing', mailing_id=mailing[0]) }}" class="edit-btn" style="
+                                    <a href="{{ url_for('edit_mailing', mailing_id=mailing.id) }}" class="edit-btn" style="
                                         background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
                                         color: white;
                                         border: none;
@@ -1178,8 +1178,8 @@
                                     </a>
                                     
                                     <button class="delete-btn" 
-                                            data-id="{{ mailing[0] }}"
-                                            data-name="{{ mailing[1]|e }}">
+                                            data-id="{{ mailing.id }}"
+                                            data-name="{{ mailing.name|e }}">
                                         🗑️ Удалить
                                     </button>
                                 </div>
@@ -1198,7 +1198,7 @@
             <div id="tab-scheduled" class="tab-content">
                 {% set scheduled_mailings = [] %}
                 {% for mailing in mailings %}
-                    {% if mailing[11] == 1 %}
+                    {% if mailing.is_scheduled %}
                         {% set _ = scheduled_mailings.append(mailing) %}
                     {% endif %}
                 {% endfor %}
@@ -1207,35 +1207,35 @@
                 {% if scheduled_mailings %}
                     <div class="mailings-grid">
                         {% for mailing in scheduled_mailings %}
-                            <!-- DEBUG: Запланированная рассылка {{ loop.index }}: ID={{ mailing[0] }}, is_recurring={{ mailing[13] if mailing|length > 13 else 'N/A' }}, recurring_days={{ mailing[14] if mailing|length > 14 else 'N/A' }}, recurring_time={{ mailing[15] if mailing|length > 15 else 'N/A' }}, next_scheduled_at={{ mailing[16] if mailing|length > 16 else 'N/A' }} -->
+                            <!-- DEBUG: Запланированная рассылка {{ loop.index }}: ID={{ mailing.id }}, is_recurring={{ mailing.is_recurring }}, recurring_days={{ mailing.recurring_days }}, recurring_time={{ mailing.recurring_time }}, next_scheduled_at={{ mailing.next_scheduled_at }} -->
                             <div class="mailing-card scheduled-card">
-                                <h3>{{ mailing[1] }}</h3>
-                                <p><strong>Текст:</strong> {{ mailing[2][:50] }}{% if mailing[2]|length > 50 %}...{% endif %}</p>
-                                <p><strong>📅 Запланировано на:</strong> {{ mailing[10][:16] if mailing[10] else 'N/A' }} (Киев)</p>
-                                {% if mailing|length > 13 and mailing[13] %}
+                                <h3>{{ mailing.name }}</h3>
+                                <p><strong>Текст:</strong> {{ mailing.message_text[:50] }}{% if mailing.message_text|length > 50 %}...{% endif %}</p>
+                                <p><strong>📅 Запланировано на:</strong> {{ mailing.scheduled_at[:16] if mailing.scheduled_at else 'N/A' }} (Киев)</p>
+                                {% if mailing.is_recurring %}
                                 <p><strong>🔄 Повторяющаяся:</strong> 
                                     <span class="status-active">✅ Да</span>
-                                    <!-- DEBUG: mailing[14] = {{ mailing[14] if mailing|length > 14 else 'N/A' }} -->
-                                    {% if mailing|length > 14 and mailing[14] %}
+                                    <!-- DEBUG: recurring_days = {{ mailing.recurring_days }} -->
+                                    {% if mailing.recurring_days %}
                                         <br><small>📅 Дни недели: 
                                             {% set days_map = {0: 'Понедельник', 1: 'Вторник', 2: 'Среда', 3: 'Четверг', 4: 'Пятница', 5: 'Суббота', 6: 'Воскресенье'} %}
-                                            <!-- DEBUG: Разбиваем строку "{{ mailing[14] }}" на дни -->
-                                            {% for day in mailing[14].split(',') %}
+                                            <!-- DEBUG: Разбиваем строку "{{ mailing.recurring_days }}" на дни -->
+                                            {% for day in mailing.recurring_days.split(',') %}
                                                 <!-- DEBUG: День {{ loop.index }}: "{{ day }}" -> {{ days_map[day|int] }} -->
                                                 {{ days_map[day|int] }}{% if not loop.last %}, {% endif %}
                                             {% endfor %}
                                         </small>
                                     {% endif %}
-                                    {% if mailing|length > 15 and mailing[15] %}
-                                        <br><small>⏰ Время отправки: {{ mailing[15] }} (Киев)</small>
+                                    {% if mailing.recurring_time %}
+                                        <br><small>⏰ Время отправки: {{ mailing.recurring_time }} (Киев)</small>
                                     {% endif %}
 
                                 </p>
                                 {% endif %}
-                                <p><strong>Создано:</strong> {{ mailing[7] }}</p>
+                                <p><strong>Создано:</strong> {{ mailing.created_at }}</p>
                                 
                                 <div class="mailing-actions">
-                                    <a href="{{ url_for('edit_mailing', mailing_id=mailing[0]) }}" class="edit-btn" style="
+                                    <a href="{{ url_for('edit_mailing', mailing_id=mailing.id) }}" class="edit-btn" style="
                                         background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
                                         color: white;
                                         border: none;
@@ -1250,17 +1250,17 @@
                                         ✏️ Редактировать
                                     </a>
                                     
-                                    <button class="start-btn" data-id="{{ mailing[0] }}">
+                                    <button class="start-btn" data-id="{{ mailing.id }}">
                                         🚀 Отправить сейчас
                                     </button>
                                     
-                                    <button class="cancel-schedule-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                    <button class="cancel-schedule-btn" data-id="{{ mailing.id }}" data-name="{{ mailing.name|e }}">
                                         ❌ Отменить планирование
                                     </button>
                                     
                                     <button class="delete-btn" 
-                                            data-id="{{ mailing[0] }}"
-                                            data-name="{{ mailing[1]|e }}">
+                                            data-id="{{ mailing.id }}"
+                                            data-name="{{ mailing.name|e }}">
                                         🗑️ Удалить
                                     </button>
                                 </div>
@@ -1279,7 +1279,7 @@
             <div id="tab-recurring" class="tab-content">
                 {% set recurring_mailings = [] %}
                 {% for mailing in mailings %}
-                    {% if mailing|length > 13 and mailing[13] == 1 %}
+                    {% if mailing.is_recurring %}
                         {% set _ = recurring_mailings.append(mailing) %}
                     {% endif %}
                 {% endfor %}
@@ -1289,52 +1289,52 @@
                     <div class="mailings-grid">
                         {% for mailing in recurring_mailings %}
                             <div class="mailing-card recurring-card">
-                                <h3>{{ mailing[1] }}</h3>
-                                <p><strong>Текст:</strong> {{ mailing[2][:50] }}{% if mailing[2]|length > 50 %}...{% endif %}</p>
+                                <h3>{{ mailing.name }}</h3>
+                                <p><strong>Текст:</strong> {{ mailing.message_text[:50] }}{% if mailing.message_text|length > 50 %}...{% endif %}</p>
                                 <p><strong>🔄 График повторения:</strong> 
-                                    <!-- DEBUG: mailing[14] = {{ mailing[14] if mailing|length > 14 else 'N/A' }} -->
-                                    {% if mailing|length > 14 and mailing[14] %}
+                                    <!-- DEBUG: recurring_days = {{ mailing.recurring_days }} -->
+                                    {% if mailing.recurring_days %}
                                         <br><small>📅 Дни недели: 
                                             {% set days_map = {0: 'Понедельник', 1: 'Вторник', 2: 'Среда', 3: 'Четверг', 4: 'Пятница', 5: 'Суббота', 6: 'Воскресенье'} %}
-                                            <!-- DEBUG: Разбиваем строку "{{ mailing[14] }}" на дни -->
-                                            {% for day in mailing[14].split(',') %}
+                                            <!-- DEBUG: Разбиваем строку "{{ mailing.recurring_days }}" на дни -->
+                                            {% for day in mailing.recurring_days.split(',') %}
                                                 <!-- DEBUG: День {{ loop.index }}: "{{ day }}" -> {{ days_map[day|int] }} -->
                                                 {{ days_map[day|int] }}{% if not loop.last %}, {% endif %}
                                             {% endfor %}
                                         </small>
                                     {% endif %}
-                                    {% if mailing|length > 15 and mailing[15] %}
-                                        <br><small>⏰ Время отправки: {{ mailing[15] }} (Киев)</small>
+                                    {% if mailing.recurring_time %}
+                                        <br><small>⏰ Время отправки: {{ mailing.recurring_time }} (Киев)</small>
                                     {% endif %}
                                 </p>
                                 <p><strong>🔄 Следующая отправка:</strong> 
-                                    {% if mailing|length > 17 and mailing[17] %}
-                                        {{ mailing[17][:16] }} (Киев)
+                                    {% if mailing.next_scheduled_at %}
+                                        {{ mailing.next_scheduled_at[:16] }} (Киев)
                                     {% else %}
                                         <span class="status-inactive">Не запланирована</span>
                                     {% endif %}
                                 </p>
                                 <p><strong>📤 Последняя отправка:</strong> 
-                                    {% if mailing[8] %}
-                                        {{ mailing[8][:16] }} ({{ mailing[9] }} пользователей)
+                                    {% if mailing.sent_at %}
+                                        {{ mailing.sent_at[:16] }} ({{ mailing.users_count }} пользователей)
                                     {% else %}
                                         <span class="status-inactive">Не отправлялась</span>
                                     {% endif %}
                                 </p>
                                 <p><strong>📅 Статус планирования:</strong> 
-                                    {% if mailing[11] %}
+                                    {% if mailing.is_scheduled %}
                                         <span class="status-scheduled">📅 Запланирована</span>
-                                        {% if mailing[10] %}
-                                            <br><small>на {{ mailing[10][:16] }} (Киев)</small>
+                                        {% if mailing.scheduled_at %}
+                                            <br><small>на {{ mailing.scheduled_at[:16] }} (Киев)</small>
                                         {% endif %}
                                     {% else %}
                                         <span class="status-inactive">Не запланирована</span>
                                     {% endif %}
                                 </p>
-                                <p><strong>Создано:</strong> {{ mailing[7] }}</p>
+                                <p><strong>Создано:</strong> {{ mailing.created_at }}</p>
                                 
                                 <div class="mailing-actions">
-                                    <a href="{{ url_for('edit_mailing', mailing_id=mailing[0]) }}" class="edit-btn" style="
+                                    <a href="{{ url_for('edit_mailing', mailing_id=mailing.id) }}" class="edit-btn" style="
                                         background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
                                         color: white;
                                         border: none;
@@ -1349,17 +1349,17 @@
                                         ✏️ Редактировать
                                     </a>
                                     
-                                    <button class="resend-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}">
+                                    <button class="resend-btn" data-id="{{ mailing.id }}" data-name="{{ mailing.name|e }}">
                                         🔄 Отправить снова
                                     </button>
                                     
-                                    <button class="toggle-recurring-btn" data-id="{{ mailing[0] }}" data-name="{{ mailing[1]|e }}" data-active="true">
+                                    <button class="toggle-recurring-btn" data-id="{{ mailing.id }}" data-name="{{ mailing.name|e }}" data-active="true">
                                         🔄 Выключить повторение
                                     </button>
                                     
                                     <button class="delete-btn" 
-                                            data-id="{{ mailing[0] }}"
-                                            data-name="{{ mailing[1]|e }}">
+                                            data-id="{{ mailing.id }}"
+                                            data-name="{{ mailing.name|e }}">
                                         🗑️ Удалить
                                     </button>
                                 </div>
