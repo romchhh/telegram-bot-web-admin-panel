@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from database.client_db import (
     add_user, update_user_activity, create_table, 
-    update_user_status_by_action
+    update_user_status_by_action, update_subscription_status
 )
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database.settings_db import (get_start_message_config, create_settings_table, get_subscription_message,
@@ -37,11 +37,15 @@ async def start(message: types.Message, state: FSMContext):
         start_param = None
         
     user_id = message.from_user.id
+    user_data = user_states.get(user_id, {})
+    current_state = user_data.get('state')
+
+
+    print(f"🔍 Current state: {current_state}")
     
     add_user(user_id, message.from_user.username, start_param)
     update_user_activity(user_id)
     
-    # Оновлюємо статус користувача
     update_user_status_by_action(user_id, "start")
     
     welcome_without_subscription = get_welcome_without_subscription()
@@ -51,7 +55,6 @@ async def start(message: types.Message, state: FSMContext):
         
         if not is_subscribed:
             print(f"🔍 Setting custom state to {UserStates.WAITING_FOR_CHANNEL_REQUEST}")
-            # Зберігаємо стан та дані користувача
             user_states[user_id] = {
                 'state': UserStates.WAITING_FOR_CHANNEL_REQUEST,
                 'channel_id': channel_id,
@@ -60,9 +63,71 @@ async def start(message: types.Message, state: FSMContext):
 
             await send_welcome_without_subscription(message, welcome_without_subscription)
             return
+        
+
+    if current_state == UserStates.WAITING_FOR_CAPTCHA:
+
+        captcha_settings = get_captcha_settings()
+        
+        captcha_message = captcha_settings["captcha_message"]
+        captcha_media_type = captcha_settings["captcha_media_type"]
+        captcha_media_url = captcha_settings["captcha_media_url"]
+        captcha_button_text = captcha_settings["captcha_button_text"]
+        
+        captcha_keyboard = create_captcha_keyboard(captcha_button_text)
+        
+        sent_message = None
+        if captcha_media_type != "none" and captcha_media_url:
+            if captcha_media_type == "photo":
+                if captcha_media_url.startswith(('http://', 'https://')):
+                    sent_message = await bot.send_photo(
+                        chat_id=user_id,
+                        photo=captcha_media_url,
+                        caption=captcha_message,
+                        parse_mode="HTML",
+                        reply_markup=captcha_keyboard
+                    )
+                else:
+                    sent_message = await bot.send_photo(
+                        chat_id=user_id,
+                        photo=captcha_media_url,
+                        caption=captcha_message,
+                        parse_mode="HTML",
+                        reply_markup=captcha_keyboard
+                    )
+            elif captcha_media_type == "video":
+                cache_key = "captcha_video"
+                success = await send_video_with_caching(
+                    types.Message(chat=types.Chat(id=user_id), from_user=types.User(id=user_id)), 
+                    captcha_media_url, 
+                    captcha_message, 
+                    captcha_keyboard, 
+                    cache_key
+                )
+                if success:
+                    try:
+                        updates = await bot.get_updates(offset=-1, limit=1)
+                        if updates:
+                            sent_message = updates[0].message
+                    except:
+                        pass
+        else:
+            sent_message = await bot.send_message(
+                chat_id=user_id,
+                text=captcha_message,
+                parse_mode="HTML",
+                reply_markup=captcha_keyboard
+            )
+        
+        if sent_message:
+            user_states[user_id]['captcha_message_id'] = sent_message.message_id
+
+        return
     
 
     config = get_start_message_config()
+
+    update_subscription_status(user_id, "✅Подписан")
     
     start_message = config["message"]
     media_type = config["media_type"]
@@ -424,7 +489,7 @@ async def handle_captcha_text(message: types.Message):
                 
                 user_states[user_id]['state'] = UserStates.CAPTCHA_VERIFIED
                 
-                update_user_status_by_action(user_id, "captcha_passed")
+                update_user_status_by_action(user_id, "answers_viewed")
                 
                 await send_answers_message_with_sequence(message)
                 
@@ -557,6 +622,7 @@ async def handle_chat_join_request(chat_join_request: types.ChatJoinRequest):
             chat_id=chat.id,
             user_id=user_id
         )
+        update_subscription_status(user_id, "✅Подписан")
         return
             
     except Exception as e:
@@ -721,9 +787,11 @@ async def handle_chat_member_update(update: types.ChatMemberUpdated):
         if new_status == "left":
             print(f"❌ Користувач {user_name} покинув канал")
             await send_channel_leave_message(bot, user_id)
+            update_subscription_status(user_id, "❌Не подписан")
         elif new_status == "kicked":
             print(f"🚫 Користувач {user_name} був вигнаний з каналу")   
             await send_channel_leave_message(bot, user_id)
+            update_subscription_status(user_id, "❌Не подписан")
     elif old_status == "restricted" and new_status == "member":
         print(f"✅ Заявку користувача {user_name} прійнято")
 
@@ -802,11 +870,24 @@ async def handle_pay_clothes_callback(callback: types.CallbackQuery):
 
 
 @router.callback_query(lambda c: c.data == "pay_tech")
-async def handle_pay_tech_callback(callback: types.CallbackQuery):
-    user_id = callback.from_user.id
+async def handle_pay_tech(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    await callback_query.message.delete()
     update_user_status_by_action(user_id, "tech_payment_clicked")
-    await callback.message.delete()
-    await send_tech_payment_message(callback.message)
+    
+    await send_tech_payment_message(callback_query.message)
+    await callback_query.answer()
+
+
+@router.callback_query(lambda c: c.data == "back_to_tariffs")
+async def handle_back_to_tariffs(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+
+    await callback_query.message.delete()
+    
+    # Отправляем пользователя обратно к основным тарифам
+    await send_tariffs_message_with_sequence(callback_query.message)
+    await callback_query.answer()
 
 
 

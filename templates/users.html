@@ -232,6 +232,16 @@
             position: relative;
         }
         
+        .subscription-subscribed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .subscription-unsubscribed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
         .status:hover::after {
             content: attr(title);
             position: absolute;
@@ -451,12 +461,16 @@
                     <div class="stat-label">Всего пользователей</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">{{ total_pages }}</div>
-                    <div class="stat-label">Страниц</div>
+                    <div class="stat-number">{{ subscription_stats.get('✅Подписан', 0) }}</div>
+                    <div class="stat-label">Подписаны</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">{{ per_page }}</div>
-                    <div class="stat-label">На странице</div>
+                    <div class="stat-number">{{ subscription_stats.get('❌Не подписан', 0) }}</div>
+                    <div class="stat-label">Не подписаны</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ total_pages }}</div>
+                    <div class="stat-label">Страниц</div>
                 </div>
             </div>
         </div>
@@ -472,8 +486,9 @@
                             <th>Имя пользователя</th>
                             <th>Дата регистрации</th>
                             <th>Последняя активность</th>
-                            <th>Стартовый параметр</th>
+                            <th>Метка</th>
                             <th>Этап (с ID)</th>
+                            <th>Статус подписки</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
@@ -500,10 +515,22 @@
                                 {% endif %}
                             </td>
                             <td>
+                                {% if user[6] %}
+                                    {% if user[6] == '✅Подписан' %}
+                                        <span class="status subscription-subscribed">✅ Подписан</span>
+                                    {% else %}
+                                        <span class="status subscription-unsubscribed">❌ Не подписан</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="status subscription-unsubscribed">❌ Не подписан</span>
+                                {% endif %}
+                            </td>
+                            <td>
                                 <button type="button" class="btn btn-sm btn-info status-change-btn" 
                                         data-user-id="{{ user[0] }}" 
                                         data-current-status="{{ user[5] or '' }}"
-                                        data-start-param="{{ user[4] or '' }}">
+                                        data-start-param="{{ user[4] or '' }}"
+                                        data-subscription-status="{{ user[6] or '❌Не подписан' }}">
                                     Изменить этап
                                 </button>
                             </td>
@@ -552,8 +579,9 @@
             <p><strong>Имя пользователя:</strong> Username пользователя (если указан)</p>
             <p><strong>Дата регистрации:</strong> Когда пользователь впервые использовал бота</p>
             <p><strong>Последняя активность:</strong> Время последнего взаимодействия с ботом</p>
-            <p><strong>Стартовый параметр:</strong> Параметр, с которым пользователь запустил бота (например: vid1, metka и т.д.)</p>
+            <p><strong>Метка:</strong> Метка, с которой пользователь запустил бота (например: vid1, metka и т.д.)</p>
             <p><strong>Этап:</strong> Текущий этап прохождения пользователя в системе (с ID для удобства)</p>
+            <p><strong>Статус подписки:</strong> Подписан ли пользователь на бота</p>
             <p><strong>Действия:</strong> Возможность изменить этап пользователя</p>
             <p><strong>Пагинация:</strong> На каждой странице отображается до {{ per_page }} пользователей</p>
             
@@ -583,8 +611,9 @@
             </div>
             <div class="modal-body">
                 <p><strong>ID пользователя:</strong> <span id="modalUserId"></span></p>
-                <p><strong>Стартовый параметр:</strong> <span id="modalStartParam"></span></p>
+                <p><strong>Метка:</strong> <span id="modalStartParam"></span></p>
                 <p><strong>Текущий этап:</strong> <span id="modalCurrentStatus"></span></p>
+                <p><strong>Статус подписки:</strong> <span id="modalSubscriptionStatus"></span></p>
                 
                 <div class="form-group">
                     <label for="newStatusSelect">Новый этап:</label>
@@ -633,11 +662,12 @@
             return stageMap[stageName] || '?';
         }
         
-        function openStatusModal(userId, currentStatus, startParam) {
+        function openStatusModal(userId, currentStatus, startParam, subscriptionStatus) {
             currentUserId = userId;
             document.getElementById('modalUserId').textContent = userId;
             document.getElementById('modalStartParam').textContent = startParam || 'Не указан';
             document.getElementById('modalCurrentStatus').textContent = currentStatus || 'Не установлен';
+            document.getElementById('modalSubscriptionStatus').textContent = subscriptionStatus || '❌ Не подписан';
             document.getElementById('newStatusSelect').value = '';
             document.getElementById('statusModal').style.display = 'block';
         }
@@ -680,6 +710,21 @@
                         statusCell.title = `ID: ${stageId}`;
                     }
                     
+                    // Обновляем статус подписки в таблице
+                    const subscriptionCell = document.querySelector(`tr[data-user-id="${currentUserId}"] td:nth-child(7) span`);
+                    if (subscriptionCell) {
+                        if (newStatus.includes('Оплатил')) {
+                            subscriptionCell.textContent = '✅ Подписан';
+                            subscriptionCell.className = 'status subscription-subscribed';
+                        } else {
+                            subscriptionCell.textContent = '❌ Не подписан';
+                            subscriptionCell.className = 'status subscription-unsubscribed';
+                        }
+                    }
+
+                    // Обновляем статус подписки в модальном окне
+                    document.getElementById('modalSubscriptionStatus').textContent = newStatus.includes('Оплатил') ? '✅ Подписан' : '❌ Не подписан';
+                    
                     // Показываем уведомление
                     showNotification(result.message, 'success');
                     closeStatusModal();
@@ -718,7 +763,8 @@
                 const userId = event.target.getAttribute('data-user-id');
                 const currentStatus = event.target.getAttribute('data-current-status');
                 const startParam = event.target.getAttribute('data-start-param');
-                openStatusModal(userId, currentStatus, startParam);
+                const subscriptionStatus = event.target.getAttribute('data-subscription-status');
+                openStatusModal(userId, currentStatus, startParam, subscriptionStatus);
             }
         });
         

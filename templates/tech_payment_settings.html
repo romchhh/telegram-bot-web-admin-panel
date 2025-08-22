@@ -358,10 +358,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="back_button_text">Текст кнопки "Вернуться назад":</label>
+                    <label for="back_button_text">Текст кнопки "Назад":</label>
                     <input type="text" id="back_button_text" name="back_button_text" class="form-control" 
                            placeholder="Введите текст кнопки..." 
-                           value="{{ tech_payment_config.back_button_text or '⬅️ Вернуться назад' }}">
+                           value="{{ tech_payment_config.back_button_text or '⬅️ Назад' }}">
                     <div class="help-text">Поддерживаются HTML теги для форматирования</div>
                 </div>
 
@@ -378,7 +378,7 @@
                         <input type="checkbox" id="show_back_button" name="show_back_button" 
                                {% if tech_payment_config.show_back_button %}checked{% endif %}>
                         <span class="checkmark"></span>
-                        Показывать кнопку "Вернуться назад"
+                        Показывать кнопку "Назад"
                     </label>
                     <input type="hidden" name="show_back_button_value" value="0">
                 </div>
@@ -397,7 +397,7 @@
                     <h3>🔘 Поточні кнопки</h3>
                     <div class="button-preview" id="back_button_preview" 
                          {% if not tech_payment_config.show_back_button %}style="display: none;"{% endif %}>
-                        {{ tech_payment_config.back_button_text or '⬅️ Вернуться назад' }}
+                        {{ tech_payment_config.back_button_text or '⬅️ Назад' }}
                     </div>
                     <div class="button-preview" id="main_menu_button_preview" 
                          {% if not tech_payment_config.show_main_menu_button %}style="display: none;"{% endif %}>
@@ -456,7 +456,7 @@
         // Оновлюємо попередній перегляд кнопок при зміні тексту
         document.getElementById('back_button_text').addEventListener('input', function() {
             const buttonPreview = document.getElementById('back_button_preview');
-            buttonPreview.innerHTML = this.value || '⬅️ Вернуться назад';
+            buttonPreview.innerHTML = this.value || '⬅️ Назад';
         });
 
         document.getElementById('main_menu_button_text').addEventListener('input', function() {

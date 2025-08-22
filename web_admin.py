@@ -12,7 +12,7 @@ from database.settings_db import (
     get_tech_tariff_config, save_tech_tariff_config, get_clothes_payment_config, save_clothes_payment_config,
     get_tech_payment_config, save_tech_payment_config
 )
-from database.client_db import get_users_count, get_users_with_statuses, admin_update_user_status
+from database.client_db import get_users_count, get_users_with_statuses, admin_update_user_status, get_subscription_stats
 from database.start_params_db import add_start_param, delete_start_param, get_total_start_params, get_users_with_start_params, get_start_params_stats
 from config import token
 from flask import Flask, render_template, request, url_for, flash, redirect
@@ -170,12 +170,16 @@ def users_list():
     
     users, total_users, total_pages, current_page, per_page = get_users_with_statuses(page, per_page)
     
+    # Получаем статистику по подпискам
+    subscription_stats = get_subscription_stats()
+    
     return render_template('users.html', 
                          users=users, 
                          current_page=current_page, 
                          total_pages=total_pages, 
                          total_users=total_users,
                          per_page=per_page,
+                         subscription_stats=subscription_stats,
                          get_stage_id_display=get_stage_id_display)
 
 @app.route('/start-params', methods=['GET', 'POST'])

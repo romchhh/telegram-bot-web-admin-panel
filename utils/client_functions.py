@@ -253,7 +253,8 @@ async def send_clothes_tariff_message(message: types.Message):
         
         from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text=config.get("button_text", "💳 Оплатить тариф"), callback_data="pay_clothes")]
+            [InlineKeyboardButton(text=config.get("button_text", "💳 Оплатить тариф"), callback_data="pay_clothes")],
+            [InlineKeyboardButton(text="⬅️ Назад", callback_data="back_to_tariffs")]
         ])
         
         if media_type != "none" and media_url:
@@ -308,7 +309,8 @@ async def send_tech_tariff_message(message: types.Message):
         
         from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text=config.get("button_text", "💳 Оплатить тариф"), callback_data="pay_tech")]
+            [InlineKeyboardButton(text=config.get("button_text", "💳 Оплатить тариф"), callback_data="pay_tech")],
+            [InlineKeyboardButton(text="⬅️ Назад", callback_data="back_to_tariffs")]
         ])
         
         if media_type != "none" and media_url:
@@ -362,7 +364,7 @@ async def send_clothes_payment_message(message: types.Message):
         keyboard_buttons = []
         
         if config.get("show_back_button", True):
-            keyboard_buttons.append([InlineKeyboardButton(text=config.get("back_button_text", "⬅️ Вернуться назад"), callback_data="clothes")])
+            keyboard_buttons.append([InlineKeyboardButton(text=config.get("back_button_text", "⬅️ Назад"), callback_data="clothes")])
         
         if config.get("show_main_menu_button", True):
             keyboard_buttons.append([InlineKeyboardButton(text=config.get("main_menu_button_text", "🏠 Главное меню"), callback_data="back_to_start")])
@@ -420,7 +422,7 @@ async def send_tech_payment_message(message: types.Message):
         keyboard_buttons = []
         
         if config.get("show_back_button", True):
-            keyboard_buttons.append([InlineKeyboardButton(text=config.get("back_button_text", "⬅️ Вернуться назад"), callback_data="tech")])
+            keyboard_buttons.append([InlineKeyboardButton(text=config.get("back_button_text", "⬅️ Назад"), callback_data="tech")])
         
         if config.get("show_main_menu_button", True):
             keyboard_buttons.append([InlineKeyboardButton(text=config.get("main_menu_button_text", "🏠 Главное меню"), callback_data="back_to_start")])

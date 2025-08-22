@@ -40,7 +40,13 @@ def create_table():
         except sqlite3.OperationalError:
             pass
         
+        try:
+            cursor.execute('ALTER TABLE users ADD COLUMN subscription_status TEXT DEFAULT "❌Не подписан"')
+        except sqlite3.OperationalError:        
+            pass
+        
         conn.commit()
+
 
 def check_user(user_id):
     with get_connection() as conn:
@@ -51,6 +57,7 @@ def check_user(user_id):
         
         return user
 
+
 def add_user(user_id, username, start_param=None):
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
@@ -59,9 +66,9 @@ def add_user(user_id, username, start_param=None):
             cursor = conn.cursor()
             
             cursor.execute('''
-                INSERT INTO users (user_id, user_name, join_date, last_activity, status, start_param)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ''', (user_id, username, current_time, current_time, 'active', start_param))
+                INSERT INTO users (user_id, user_name, join_date, last_activity, status, start_param, subscription_status)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (user_id, username, current_time, current_time, 'active', start_param, '❌Не подписан'))
             conn.commit()
     except sqlite3.IntegrityError:
         with get_connection() as conn:
@@ -113,6 +120,14 @@ def get_users_by_status(status: str) -> List[Tuple]:
         cursor.execute('SELECT * FROM users WHERE status = ?', (status,))
         return cursor.fetchall()
 
+
+
+def change_user_channel_status(user_id: int, channel_status: str) -> bool:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('UPDATE users SET channel_status = ? WHERE user_id = ?', (channel_status, user_id))
+        conn.commit()
+        return cursor.rowcount > 0
 
 
 def get_start_params_stats():
@@ -268,7 +283,7 @@ def get_users_with_statuses(page: int = 1, per_page: int = 20) -> tuple:
         
         offset = (page - 1) * per_page
         cursor.execute('''
-            SELECT user_id, user_name, join_date, last_activity, start_param, status
+            SELECT user_id, user_name, join_date, last_activity, start_param, status, subscription_status
             FROM users 
             ORDER BY last_activity DESC 
             LIMIT ? OFFSET ?
@@ -276,6 +291,64 @@ def get_users_with_statuses(page: int = 1, per_page: int = 20) -> tuple:
         
         users = cursor.fetchall()
         return users, total_users, total_pages, page, per_page
+
+
+def update_subscription_status(user_id: int, subscription_status: str) -> bool:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE users 
+            SET subscription_status = ?, last_activity = CURRENT_TIMESTAMP
+            WHERE user_id = ?
+        ''', (subscription_status, user_id))
+        conn.commit()
+        return cursor.rowcount > 0
+
+
+def get_subscription_status(user_id: int) -> Optional[str]:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT subscription_status FROM users WHERE user_id = ?', (user_id,))
+        result = cursor.fetchone()
+        return result[0] if result else "❌Не подписан"
+
+
+def get_users_with_subscription_statuses(page: int = 1, per_page: int = 20) -> tuple:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT COUNT(*) FROM users')
+        total_users = cursor.fetchone()[0]
+        
+        total_pages = (total_users + per_page - 1) // per_page
+        
+        offset = (page - 1) * per_page
+        cursor.execute('''
+            SELECT user_id, user_name, join_date, last_activity, start_param, status, subscription_status
+            FROM users 
+            ORDER BY last_activity DESC 
+            LIMIT ? OFFSET ?
+        ''', (per_page, offset))
+        
+        users = cursor.fetchall()
+        return users, total_users, total_pages, page, per_page
+
+
+def get_subscription_stats() -> dict:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT subscription_status, COUNT(*) as count
+            FROM users 
+            GROUP BY subscription_status
+        ''')
+        
+        stats = {}
+        for row in cursor.fetchall():
+            status, count = row
+            stats[status] = count
+        
+        return stats
 
 
 

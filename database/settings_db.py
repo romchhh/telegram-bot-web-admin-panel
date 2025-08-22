@@ -1072,7 +1072,7 @@ def save_subscription_message(message_text: str, media_type: str = "none",
             INSERT INTO subscription_messages 
             (message_text, media_type, media_url, inline_buttons, inline_buttons_position, 
              back_button_text, main_menu_button_text, show_back_button, show_main_menu_button, is_active)
-            VALUES (?, ?, ?, ?, 'below', '⬅️ Вернуться назад', '🏠 Главное меню', 1, 1, 1)
+            VALUES (?, ?, ?, ?, 'below', '⬅️ Назад', '🏠 Главное меню', 1, 1, 1)
         ''', (message_text, media_type, media_url, json.dumps(inline_buttons)))
         
         conn.commit()
@@ -1472,7 +1472,7 @@ def get_all_welcome_without_subscription() -> List[Dict[str, Any]]:
 
 def save_subscription_message_with_buttons(message_text: str, media_type: str = "none", 
                                         media_url: str = None, inline_buttons: List[Dict] = None,
-                                        inline_buttons_position: str = "below", back_button_text: str = "⬅️ Вернуться назад",
+                                        inline_buttons_position: str = "below", back_button_text: str = "⬅️ Назад",
                                         main_menu_button_text: str = "🏠 Главное меню", show_back_button: bool = True,
                                         show_main_menu_button: bool = True) -> bool:
     with get_connection() as conn:
@@ -1494,7 +1494,7 @@ def save_subscription_message_with_buttons(message_text: str, media_type: str = 
 
 def update_subscription_message_with_buttons(message_id: int, message_text: str, media_type: str = "none",
                                           media_url: str = None, inline_buttons: List[Dict] = None,
-                                          inline_buttons_position: str = "below", back_button_text: str = "⬅️ Вернуться назад",
+                                          inline_buttons_position: str = "below", back_button_text: str = "⬅️ Назад",
                                           main_menu_button_text: str = "🏠 Главное меню", show_back_button: bool = True,
                                           show_main_menu_button: bool = True) -> bool:
     with get_connection() as conn:
@@ -1711,7 +1711,7 @@ def get_clothes_payment_config() -> Dict[str, Any]:
         "message": settings.get("clothes_payment_message", "💳 <b>Оплата тарифу 'Одежда'</b>\n\nІнформація про оплату..."),
         "media_type": settings.get("clothes_payment_media_type", "none"),
         "media_url": settings.get("clothes_payment_media_url", ""),
-        "back_button_text": settings.get("clothes_payment_back_button_text", "⬅️ Вернуться назад"),
+        "back_button_text": settings.get("clothes_payment_back_button_text", "⬅️ Назад"),
         "main_menu_button_text": settings.get("clothes_payment_main_menu_button_text", "🏠 Главное меню"),
         "show_back_button": settings.get("clothes_payment_show_back_button", "1") == "1",
         "show_main_menu_button": settings.get("clothes_payment_show_main_menu_button", "1") == "1"
@@ -1725,7 +1725,7 @@ def save_clothes_payment_config(message: str, media_type: str = "none", media_ur
         update_setting('clothes_payment_message', message)
         update_setting('clothes_payment_media_type', media_type)
         update_setting('clothes_payment_media_url', media_url or '')
-        update_setting('clothes_payment_back_button_text', back_button_text or '⬅️ Вернуться назад')
+        update_setting('clothes_payment_back_button_text', back_button_text or '⬅️ Назад')
         update_setting('clothes_payment_main_menu_button_text', main_menu_button_text or '🏠 Главное меню')
         update_setting('clothes_payment_show_back_button', 1 if show_back_button else 0)
         update_setting('clothes_payment_show_main_menu_button', 1 if show_main_menu_button else 0)
@@ -1742,7 +1742,7 @@ def get_tech_payment_config() -> Dict[str, Any]:
         "message": settings.get("tech_payment_message", "💳 <b>Оплата тарифу 'Техника'</b>\n\nІнформація про оплату..."),
         "media_type": settings.get("tech_payment_media_type", "none"),
         "media_url": settings.get("tech_payment_media_url", ""),
-        "back_button_text": settings.get("tech_payment_back_button_text", "⬅️ Вернуться назад"),
+        "back_button_text": settings.get("tech_payment_back_button_text", "⬅️ Назад"),
         "main_menu_button_text": settings.get("tech_payment_main_menu_button_text", "🏠 Главное меню"),
         "show_back_button": settings.get("tech_payment_show_back_button", "1") == "1",
         "show_main_menu_button": settings.get("tech_payment_show_main_menu_button", "1") == "1"
@@ -1756,7 +1756,7 @@ def save_tech_payment_config(message: str, media_type: str = "none", media_url: 
         update_setting('tech_payment_message', message)
         update_setting('tech_payment_media_type', media_type)
         update_setting('tech_payment_media_url', media_url or '')
-        update_setting('tech_payment_back_button_text', back_button_text or '⬅️ Вернуться назад')
+        update_setting('tech_payment_back_button_text', back_button_text or '⬅️ Назад')
         update_setting('tech_payment_main_menu_button_text', main_menu_button_text or '🏠 Главное меню')
         update_setting('tech_payment_show_back_button', 1 if show_back_button else 0)
         update_setting('tech_payment_show_main_menu_button', 1 if show_main_menu_button else 0)
