@@ -384,37 +384,37 @@
         {% endwith %}
         
         <div class="card">
-            <h2>✏️ Редактирование рассылки "{{ mailing[1] }}"</h2>
+            <h2>✏️ Редактирование рассылки "{{ mailing.name }}"</h2>
             
             <div class="mailing-info">
                 <strong>Текущие настройки:</strong><br>
-                <strong>Название:</strong> {{ mailing[1] }}<br>
-                <strong>Текст:</strong> {{ mailing[2][:100] }}{% if mailing[2]|length > 100 %}...{% endif %}<br>
-                <strong>Медиа:</strong> {{ mailing[3] }} {% if mailing[4] %}- {{ mailing[4][:50] }}...{% endif %}<br>
-                <strong>Кнопки:</strong> {{ mailing[5] if mailing[5] else 'Без кнопок' }}<br>
+                <strong>Название:</strong> {{ mailing.name }}<br>
+                <strong>Текст:</strong> {{ mailing.message_text[:100] }}{% if mailing.message_text|length > 100 %}...{% endif %}<br>
+                <strong>Медиа:</strong> {{ mailing.media_type }} {% if mailing.media_url %}- {{ mailing.media_url[:50] }}...{% endif %}<br>
+                <strong>Кнопки:</strong> {{ mailing.inline_buttons if mailing.inline_buttons else 'Без кнопок' }}<br>
                 <strong>Статус:</strong> 
-                {% if mailing[6] %}
+                {% if mailing.sent_at %}
                     <span style="color: #28a745;">✅ Отправлена</span>
-                {% elif mailing[10] and mailing[11] %}
-                    <span style="color: #007bff;">📅 Запланована на {{ mailing[10][:16] }}</span>
+                {% elif mailing.scheduled_at and mailing.is_scheduled %}
+                    <span style="color: #007bff;">📅 Запланована на {{ mailing.scheduled_at[:16] }}</span>
                 {% else %}
                     <span style="color: #6c757d;">📝 Создана</span>
                 {% endif %}
                 <br>
-                <strong>Створено:</strong> {{ mailing[7] }}
+                <strong>Створено:</strong> {{ mailing.created_at }}
             </div>
             
-            <form method="POST" action="{{ url_for('update_mailing', mailing_id=mailing[0]) }}" onsubmit="return validateForm()">
+            <form method="POST" action="{{ url_for('update_mailing', mailing_id=mailing.id) }}" onsubmit="return validateForm()">
                 <div class="form-group">
                     <label for="mailing_name">Название рассылки:</label>
                     <input type="text" id="mailing_name" name="mailing_name" 
-                           placeholder="Название рассылки" value="{{ mailing[1] }}" required>
+                           placeholder="Название рассылки" value="{{ mailing.name }}" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="message_text">Текст сообщения:</label>
                     <textarea id="message_text" name="message_text" 
-                              placeholder="Введите текст рассылки..." required>{{ mailing[2] }}</textarea>
+                              placeholder="Введите текст рассылки..." required>{{ mailing.message_text }}</textarea>
                     <small>Поддерживается HTML форматирование</small>
                 </div>
                 
@@ -431,9 +431,9 @@
                     <div class="form-group">
                         <label for="media_type">Тип медиа:</label>
                         <select id="media_type" name="media_type" onchange="toggleMediaFields()">
-                            <option value="none" {% if mailing[3] == "none" %}selected{% endif %}>Без медиа</option>
-                            <option value="photo" {% if mailing[3] == "photo" %}selected{% endif %}>Фото</option>
-                            <option value="video" {% if mailing[3] == "video" %}selected{% endif %}>Відео</option>
+                            <option value="none" {% if mailing.media_type == "none" %}selected{% endif %}>Без медиа</option>
+                            <option value="photo" {% if mailing.media_type == "photo" %}selected{% endif %}>Фото</option>
+                            <option value="video" {% if mailing.media_type == "video" %}selected{% endif %}>Відео</option>
                         </select>
                     </div>
                     
@@ -441,18 +441,18 @@
                         <label for="media_url">URL медиа файла:</label>
                         <input type="text" id="media_url" name="media_url" 
                                placeholder="https://example.com/image.jpg" 
-                               value="{{ mailing[4] }}" oninput="updateMediaPreview()">
+                               value="{{ mailing.media_url }}" oninput="updateMediaPreview()">
                     </div>
                 </div>
                 
                 <div id="media_preview" class="media-preview" style="display: none;">
                     <strong>Попередній перегляд:</strong>
                     <div id="preview_content">
-                        {% if mailing[3] == "photo" and mailing[4] %}
-                            <img src="{{ mailing[4] }}" alt="Попередній перегляд фото" style="max-width: 100%; border-radius: 8px; margin-top: 0.5rem;">
-                        {% elif mailing[3] == "video" and mailing[4] %}
+                        {% if mailing.media_type == "photo" and mailing.media_url %}
+                            <img src="{{ mailing.media_url }}" alt="Попередній перегляд фото" style="max-width: 100%; border-radius: 8px; margin-top: 0.5rem;">
+                        {% elif mailing.media_type == "video" and mailing.media_url %}
                             <video controls style="max-width: 100%; border-radius: 8px; margin-top: 0.5rem;">
-                                <source src="{{ mailing[4] }}" type="video/mp4">
+                                <source src="{{ mailing.media_url }}" type="video/mp4">
                                 Ваш браузер не поддерживает видео.
                             </video>
                         {% endif %}
@@ -462,8 +462,8 @@
                 <div class="buttons-section">
                     <h3>📱 Inline кнопки</h3>
                     <div id="buttons-container">
-                        {% if mailing[5] %}
-                            {% set inline_buttons = mailing[5]|from_json %}
+                        {% if mailing.inline_buttons %}
+                            {% set inline_buttons = mailing.inline_buttons|from_json %}
                             {% if inline_buttons and inline_buttons|length > 0 %}
                                 {% for button in inline_buttons %}
                                     {% if button.text and button.url %}
@@ -620,8 +620,8 @@
         
         document.addEventListener('DOMContentLoaded', function() {
             // Set initial display state based on mailing data
-            const mediaType = '{{ mailing[3] }}';
-            const mediaUrl = '{{ mailing[4] }}';
+            const mediaType = '{{ mailing.media_type }}';
+            const mediaUrl = '{{ mailing.media_url }}';
             
             if (mediaType !== 'none') {
                 document.getElementById('media_url_group').style.display = 'block';

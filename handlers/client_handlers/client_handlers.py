@@ -182,6 +182,66 @@ async def start(message: types.Message, state: FSMContext):
 
 
 
+@router.callback_query(lambda c: c.data == "back_to_welcome")
+async def back_to_welcome_handler(callback: types.CallbackQuery):
+    config = get_start_message_config()
+
+    await callback.message.delete()
+
+    update_subscription_status(callback.from_user.id, "✅Подписан")
+    
+    start_message = config["message"]
+    media_type = config["media_type"]
+    media_url = config["media_url"]
+    inline_buttons = config.get("inline_buttons", [])
+    answers_button_text = config.get("answers_button_text", "💡 Ответы")
+    private_lesson_button_text = config.get("private_lesson_button_text", "🎓 Приватный урок")
+    tariffs_button_text = config.get("tariffs_button_text", "💰 Тарифы")
+    inline_buttons_position = config.get("inline_buttons_position", "below")
+    
+    combined_keyboard = create_combined_keyboard(inline_buttons, answers_button_text, private_lesson_button_text, tariffs_button_text, inline_buttons_position)
+    
+    if media_type != "none" and media_url:
+        if media_type == "photo":
+            if media_url.startswith(('http://', 'https://')):
+                await callback.message.answer_photo(
+                    photo=media_url,
+                    caption=start_message,
+                    parse_mode="HTML",
+                    reply_markup=combined_keyboard
+                )
+            else:
+                await callback.message.answer_photo(
+                    photo=media_url,
+                    caption=start_message,
+                    parse_mode="HTML",
+                    reply_markup=combined_keyboard
+                )
+        elif media_type == "video":
+            if media_url.startswith(('http://', 'https://')):
+                cache_key = "welcome_video"
+                success = await send_video_with_caching(
+                    callback.message, 
+                    media_url, 
+                    start_message, 
+                    combined_keyboard, 
+                    cache_key
+                )
+            else:
+                await callback.message.answer_video(
+                    video=media_url,
+                    caption=start_message,
+                    parse_mode="HTML",
+                    reply_markup=combined_keyboard
+                )
+    else:
+        await callback.message.answer(
+            start_message,
+            parse_mode="HTML",
+            reply_markup=combined_keyboard
+        )
+
+
 
 
 
@@ -810,7 +870,7 @@ async def handle_answers_callback(callback: types.CallbackQuery):
     user_id = callback.from_user.id
     update_user_status_by_action(user_id, "answers_viewed")
     await callback.message.delete()
-    await send_answers_message_with_sequence(callback.message)
+    await send_answers_message_with_sequence(callback.message, from_welcome=True)
 
 
 @router.callback_query(lambda c: c.data == "private_lesson")
@@ -818,7 +878,7 @@ async def handle_private_lesson_callback(callback: types.CallbackQuery):
     user_id = callback.from_user.id
     update_user_status_by_action(user_id, "private_lesson_viewed")
     await callback.message.delete()
-    await send_private_lesson_message_with_sequence(callback.message)
+    await send_private_lesson_message_with_sequence(callback.message, from_welcome=True)
 
 
 @router.callback_query(lambda c: c.data == "tariffs")
@@ -826,7 +886,7 @@ async def handle_tariffs_callback(callback: types.CallbackQuery):
     user_id = callback.from_user.id
     update_user_status_by_action(user_id, "tariffs_viewed")
     await callback.message.delete()
-    await send_tariffs_message_with_sequence(callback.message)
+    await send_tariffs_message_with_sequence(callback.message, from_welcome=True)
 
 
 @router.callback_query(lambda c: c.data == "private_lesson_sequence")

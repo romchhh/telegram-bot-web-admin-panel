@@ -406,6 +406,15 @@
             background: #5a6268;
         }
         
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
         /* Notification styles */
         .notification {
             position: fixed;
@@ -635,6 +644,7 @@
                 
                 <div class="modal-actions">
                     <button type="button" class="btn btn-success" onclick="updateUserStatus()">Сохранить</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteUser()">🗑️ Удалить</button>
                     <button type="button" class="btn btn-secondary" onclick="closeStatusModal()">Отмена</button>
                 </div>
             </div>
@@ -734,6 +744,63 @@
             } catch (error) {
                 console.error('Error:', error);
                 showNotification('Произошла ошибка при обновлении этапа', 'error');
+            }
+        }
+        
+        async function deleteUser() {
+            if (!confirm(`Вы уверены, что хотите удалить пользователя с ID ${currentUserId}? Это действие нельзя отменить.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/delete-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUserId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Удаляем строку пользователя из таблицы
+                    const userRow = document.querySelector(`tr[data-user-id="${currentUserId}"]`);
+                    if (userRow) {
+                        userRow.remove();
+                    }
+                    
+                    // Показываем уведомление
+                    showNotification(result.message, 'success');
+                    closeStatusModal();
+                    
+                    // Обновляем статистику
+                    updateStats();
+                } else {
+                    showNotification(result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Произошла ошибка при удалении пользователя', 'error');
+            }
+        }
+        
+        async function updateStats() {
+            try {
+                const response = await fetch('/api/get-stats');
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Обновляем статистику на странице
+                    const totalUsersElement = document.querySelector('.stat-number');
+                    if (totalUsersElement) {
+                        totalUsersElement.textContent = result.total_users;
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating stats:', error);
             }
         }
         

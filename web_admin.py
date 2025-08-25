@@ -12,7 +12,7 @@ from database.settings_db import (
     get_tech_tariff_config, save_tech_tariff_config, get_clothes_payment_config, save_clothes_payment_config,
     get_tech_payment_config, save_tech_payment_config
 )
-from database.client_db import get_users_count, get_users_with_statuses, admin_update_user_status, get_subscription_stats
+from database.client_db import get_users_count, get_users_with_statuses, admin_update_user_status, get_subscription_stats, admin_delete_user
 from database.start_params_db import add_start_param, delete_start_param, get_total_start_params, get_users_with_start_params, get_start_params_stats
 from config import token
 from flask import Flask, render_template, request, url_for, flash, redirect
@@ -146,18 +146,24 @@ def private_lesson_settings():
 @login_required
 def tariffs_settings():
     """Страница настройки сообщения 'Посмотреть тарифы'"""
+    from database.settings_db import get_tariff_selection_buttons_config
+    
     tariffs_config = get_tariffs_config()
     clothes_config = get_clothes_tariff_config()
     tech_config = get_tech_tariff_config()
+    selection_buttons_config = get_tariff_selection_buttons_config()
     
     # Об'єднуємо всі налаштування
     combined_config = {
         **tariffs_config,
-        'clothes_button_text': clothes_config.get('button_text'),
-        'tech_button_text': tech_config.get('button_text')
+        'clothes_button_text': selection_buttons_config.get('clothes_selection_button_text'),
+        'tech_button_text': selection_buttons_config.get('tech_selection_button_text')
     }
     
-    return render_template('tariffs_settings.html', tariffs_config=combined_config)
+    return render_template('tariffs_settings.html', 
+                         tariffs_config=combined_config,
+                         clothes_config=clothes_config,
+                         tech_config=tech_config)
 
 
 
@@ -1306,6 +1312,9 @@ def edit_mailing(mailing_id):
         return redirect(url_for('mailing_settings'))
     
     print(f"DEBUG: mailing found: {mailing}")
+    print(f"DEBUG: mailing type: {type(mailing)}")
+    if mailing:
+        print(f"DEBUG: mailing keys: {mailing.keys() if isinstance(mailing, dict) else 'Not a dict'}")
     return render_template('edit_mailing.html', mailing=mailing)
 
 @app.route('/update_mailing/<int:mailing_id>', methods=['POST'])
@@ -1645,27 +1654,21 @@ def save_tariffs_settings_route():
             inline_buttons=inline_buttons
         )
         
-        # Зберігаємо налаштування кнопок окремо
+        # Зберігаємо налаштування кнопок вибору тарифів окремо
         if success:
+            from database.settings_db import save_tariff_selection_buttons_config
+            
             print(f"DEBUG: Зберігаємо clothes_button_text = '{clothes_button_text}'")
-            clothes_success = save_clothes_tariff_config(
-                message="",  # Це налаштовується окремо
-                media_type="none",
-                media_url="",
-                button_text=clothes_button_text
-            )
-            
             print(f"DEBUG: Зберігаємо tech_button_text = '{tech_button_text}'")
-            tech_success = save_tech_tariff_config(
-                message="",  # Це налаштовується окремо
-                media_type="none",
-                media_url="",
-                button_text=tech_button_text
+            
+            buttons_success = save_tariff_selection_buttons_config(
+                clothes_button_text=clothes_button_text,
+                tech_button_text=tech_button_text
             )
             
-            print(f"DEBUG: clothes_success = {clothes_success}, tech_success = {tech_success}")
+            print(f"DEBUG: buttons_success = {buttons_success}")
             
-            if clothes_success and tech_success:
+            if buttons_success:
                 flash('Налаштування повідомлення "Посмотреть тарифы" успішно збережено!', 'success')
             else:
                 flash('Частично збережено налаштування!', 'warning')
@@ -1958,6 +1961,48 @@ def api_update_user_status():
         
     except Exception as e:
         print(f"ERROR in api_update_user_status: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/api/delete-user', methods=['POST'])
+@login_required
+def api_delete_user():
+    """AJAX endpoint для удаления пользователя"""
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        
+        if not user_id:
+            return jsonify({'success': False, 'error': 'Отсутствует ID пользователя'})
+        
+        success = admin_delete_user(user_id)
+        
+        if success:
+            return jsonify({'success': True, 'message': f'Пользователь {user_id} успешно удален'})
+        else:
+            return jsonify({'success': False, 'error': f'Ошибка при удалении пользователя {user_id}'})
+        
+    except Exception as e:
+        print(f"ERROR in api_delete_user: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/api/get-stats', methods=['GET'])
+@login_required
+def api_get_stats():
+    """AJAX endpoint для получения статистики"""
+    try:
+        total_users = get_users_count()
+        subscription_stats = get_subscription_stats()
+        
+        return jsonify({
+            'success': True,
+            'total_users': total_users,
+            'subscription_stats': subscription_stats
+        })
+        
+    except Exception as e:
+        print(f"ERROR in api_get_stats: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
 

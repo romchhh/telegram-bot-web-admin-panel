@@ -351,6 +351,19 @@ def get_subscription_stats() -> dict:
         return stats
 
 
+def admin_delete_user(user_id: int) -> bool:
+    """Удаляет пользователя из базы данных"""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM users WHERE user_id = ?', (user_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+    except Exception as e:
+        print(f"Error deleting user {user_id}: {e}")
+        return False
+
+
 
 
 

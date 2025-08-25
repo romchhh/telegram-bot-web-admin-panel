@@ -76,7 +76,7 @@ async def send_welcome_without_subscription(message: types.Message, welcome_conf
 
 
 
-async def send_answers_message_with_sequence(message: types.Message):
+async def send_answers_message_with_sequence(message: types.Message, from_welcome: bool = False):
     try:
         config = get_answers_config()
         
@@ -84,9 +84,15 @@ async def send_answers_message_with_sequence(message: types.Message):
         media_type = config["media_type"]
         media_url = config["media_url"]
         
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        # Створюємо клавіатуру з кнопкою "Назад" тільки якщо це з привітання
+        keyboard_buttons = [
             [InlineKeyboardButton(text="🎓 Приватный урок", callback_data="private_lesson_sequence")]
-        ])
+        ]
+        
+        if from_welcome:
+            keyboard_buttons.append([InlineKeyboardButton(text="⬅️ Назад", callback_data="back_to_welcome")])
+        
+        keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
         
         if media_type != "none" and media_url:
             if media_type == "photo":
@@ -127,7 +133,7 @@ async def send_answers_message_with_sequence(message: types.Message):
         print(f"❌ Помилка при відправці послідовного повідомлення 'Ответы на вопросы': {e}")
 
 
-async def send_private_lesson_message_with_sequence(message: types.Message):
+async def send_private_lesson_message_with_sequence(message: types.Message, from_welcome: bool = False):
     try:
         config = get_private_lesson_config()
         update_user_status_by_action(message.from_user.id, "private_lesson_viewed")
@@ -136,9 +142,15 @@ async def send_private_lesson_message_with_sequence(message: types.Message):
         media_type = config["media_type"]
         media_url = config["media_url"]
         
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        # Створюємо клавіатуру з кнопкою "Назад" тільки якщо це з привітання
+        keyboard_buttons = [
             [InlineKeyboardButton(text="💰 Посмотреть тарифы", callback_data="tariffs_sequence")]
-        ])
+        ]
+        
+        if from_welcome:
+            keyboard_buttons.append([InlineKeyboardButton(text="⬅️ Назад", callback_data="back_to_welcome")])
+        
+        keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
         
         if media_type != "none" and media_url:
             if media_type == "photo":
@@ -180,7 +192,7 @@ async def send_private_lesson_message_with_sequence(message: types.Message):
         print(f"❌ Помилка при відправці послідовного повідомлення 'Приватный урок': {e}")
 
 
-async def send_tariffs_message_with_sequence(message: types.Message):
+async def send_tariffs_message_with_sequence(message: types.Message, from_welcome: bool = False):
     try:
         from database.settings_db import get_tariffs_config, get_clothes_tariff_config, get_tech_tariff_config
         config = get_tariffs_config()
@@ -191,14 +203,23 @@ async def send_tariffs_message_with_sequence(message: types.Message):
         media_type = config["media_type"]
         media_url = config["media_url"]
         
-        # Отримуємо назви кнопок з бази даних
-        clothes_button_text = clothes_config.get("button_text", "👗 Одежда")
-        tech_button_text = tech_config.get("button_text", "🔧 Техника")
+        # Отримуємо назви кнопок ВИБОРУ тарифів з бази даних
+        from database.settings_db import get_tariff_selection_buttons_config
+        selection_buttons_config = get_tariff_selection_buttons_config()
         
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        clothes_button_text = selection_buttons_config.get("clothes_selection_button_text", "👗 Тариф Одежда")
+        tech_button_text = selection_buttons_config.get("tech_selection_button_text", "🔧 Тариф Техника")
+        
+        # Створюємо клавіатуру з кнопкою "Назад" тільки якщо це з привітання
+        keyboard_buttons = [
             [InlineKeyboardButton(text=clothes_button_text, callback_data="clothes")],
             [InlineKeyboardButton(text=tech_button_text, callback_data="tech")]
-        ])
+        ]
+        
+        if from_welcome:
+            keyboard_buttons.append([InlineKeyboardButton(text="⬅️ Назад", callback_data="back_to_welcome")])
+        
+        keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
         
         if media_type != "none" and media_url:
             if media_type == "photo":
@@ -252,6 +273,7 @@ async def send_clothes_tariff_message(message: types.Message):
         media_url = config.get("media_url", "")
         
         from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+        # Кнопка "Оплатить тариф" налаштовується в розділі "Тариф Одежда"
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text=config.get("button_text", "💳 Оплатить тариф"), callback_data="pay_clothes")],
             [InlineKeyboardButton(text="⬅️ Назад", callback_data="back_to_tariffs")]
@@ -308,6 +330,7 @@ async def send_tech_tariff_message(message: types.Message):
         media_url = config.get("media_url", "")
         
         from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+        # Кнопка "Оплатить тариф" налаштовується в розділі "Тариф Техника"
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text=config.get("button_text", "💳 Оплатить тариф"), callback_data="pay_tech")],
             [InlineKeyboardButton(text="⬅️ Назад", callback_data="back_to_tariffs")]

@@ -54,12 +54,12 @@ def create_inline_only_keyboard(inline_buttons):
                         InlineKeyboardButton(text=button['text'].strip(), url=button['url'].strip())
                     ])
     
-    keyboard_buttons.append([
-        InlineKeyboardButton(
-            text="⬅️ Назад в главное меню",
-            callback_data="back_to_start"
-        )
-    ])
+    # keyboard_buttons.append([
+    #     InlineKeyboardButton(
+    #         text="⬅️ Назад в главное меню",
+    #         callback_data="back_to_start"
+    #     )
+    # ])
     
     return InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
 

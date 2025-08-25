@@ -308,6 +308,27 @@
                 opacity: 1;
             }
         }
+        
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1001;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .notification-success {
+            background: #28a745;
+        }
+        
+        .notification-error {
+            background: #dc3545;
+        }
     </style>
 </head>
 <body>
@@ -391,7 +412,7 @@
                             <td>
                                 <div class="link-display" onclick="copyLinkOnClick('https://t.me/{{ bot_username }}?start={{ param.param_name }}', event)" style="cursor: pointer;">
                                     <span class="link-text">https://t.me/{{ bot_username }}?start={{ param.param_name }}</span>
-                                    <button class="copy-btn" onclick="event.stopPropagation(); copyToClipboard('https://t.me/{{ bot_username }}?start={{ param.param_name }}')">
+                                    <button class="copy-btn" onclick="event.stopPropagation(); copyToClipboard('https://t.me/{{ bot_username }}?start={{ param.param_name }}', event)">
                                         📋
                                     </button>
                                 </div>
@@ -418,7 +439,7 @@
     </div>
     
     <script>
-        function copyToClipboard(text) {
+        function copyToClipboard(text, event) {
             navigator.clipboard.writeText(text).then(function() {
                 // Показуємо повідомлення про успішне копіювання
                 const btn = event.target;
@@ -456,6 +477,18 @@
                 console.error('Ошибка копирования: ', err);
                 showNotification('Ошибка копирования ссылки', 'error');
             });
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
     </script>
 </body>

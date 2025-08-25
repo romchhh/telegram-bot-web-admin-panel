@@ -1764,3 +1764,63 @@ def save_tech_payment_config(message: str, media_type: str = "none", media_url: 
     except Exception as e:
         print(f"❌ Помилка при збереженні налаштувань оплати 'Техника': {e}")
         return False
+
+
+def get_tariff_selection_buttons_config() -> Dict[str, Any]:
+    """Получает настройки кнопок выбора тарифов в сообщении 'Посмотреть тарифы'"""
+    settings = get_all_settings()
+    
+    return {
+        "clothes_selection_button_text": settings.get("clothes_selection_button_text", "👗 Тариф Одежда"),
+        "tech_selection_button_text": settings.get("tech_selection_button_text", "🔧 Тариф Техника")
+    }
+
+
+def save_tariff_selection_buttons_config(clothes_button_text: str = None, tech_button_text: str = None) -> bool:
+    """Сохраняет настройки кнопок выбора тарифов в сообщении 'Посмотреть тарифы'"""
+    try:
+        if clothes_button_text is not None:
+            update_setting('clothes_selection_button_text', clothes_button_text)
+        if tech_button_text is not None:
+            update_setting('tech_selection_button_text', tech_button_text)
+        return True
+    except Exception as e:
+        print(f"❌ Помилка при збереженні налаштувань кнопок вибору тарифів: {e}")
+        return False
+
+
+def update_mailing_users_count(mailing_id: int, users_count: int) -> bool:
+    """Обновляет количество пользователей, получивших рассылку"""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE mailings 
+                SET users_count = ?, sent_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (users_count, mailing_id))
+            conn.commit()
+            return cursor.rowcount > 0
+    except Exception as e:
+        print(f"Error updating mailing users count for ID {mailing_id}: {e}")
+        return False
+
+
+def delete_mailing(mailing_id: int) -> bool:
+    """Удаляет рассылку и все связанные с ней данные"""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Сначала удаляем связанные записи из таблицы recurring_mailings
+            cursor.execute('DELETE FROM recurring_mailings WHERE mailing_id = ?', (mailing_id,))
+            
+            # Затем удаляем саму рассылку
+            cursor.execute('DELETE FROM mailings WHERE id = ?', (mailing_id,))
+            
+            conn.commit()
+            return cursor.rowcount > 0
+            
+    except Exception as e:
+        print(f"Error deleting mailing {mailing_id}: {e}")
+        return False
