@@ -14,7 +14,6 @@ from database.settings_db import (get_start_message_config, create_settings_tabl
 from keyboards.client_keyboards import get_subscription_message_keyboard, create_combined_keyboard, create_captcha_keyboard, create_inline_only_keyboard
 from database.start_params_db import create_start_params_table
 from utils.video_cache import send_video_with_caching
-from config import CHANNEL_ID
 from states.client_states import MediaStates
 from utils.client_functions import check_user_subscription, send_welcome_without_subscription, send_answers_message_with_sequence, send_private_lesson_message_with_sequence, send_tariffs_message_with_sequence, send_clothes_tariff_message, send_tech_tariff_message, send_clothes_payment_message, send_tech_payment_message
 
