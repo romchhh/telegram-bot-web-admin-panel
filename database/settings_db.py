@@ -1385,6 +1385,34 @@ def update_mailing_data(mailing_id: int, name: str, message_text: str,
             return False
 
 
+def update_mailing_scheduled_time(mailing_id: int, scheduled_time: str) -> bool:
+    """Оновлення запланованого часу розсилки"""
+    print(f"DEBUG: update_mailing_scheduled_time called with mailing_id={mailing_id}, scheduled_time='{scheduled_time}'")
+    
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        
+        try:
+            print(f"DEBUG: Executing UPDATE query for mailing_id={mailing_id}")
+            cursor.execute('''
+                UPDATE mailings 
+                SET scheduled_at = ?
+                WHERE id = ?
+            ''', (scheduled_time, mailing_id))
+            
+            rows_affected = cursor.rowcount
+            print(f"DEBUG: Rows affected: {rows_affected}")
+            
+            conn.commit()
+            print(f"DEBUG: Commit successful")
+            return True
+            
+        except Exception as e:
+            print(f"ERROR in update_mailing_scheduled_time: {e}")
+            conn.rollback()
+            return False
+
+
 def get_welcome_without_subscription() -> Optional[Dict[str, Any]]:
     with get_connection() as conn:
         cursor = conn.cursor()

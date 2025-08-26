@@ -1321,9 +1321,10 @@ def edit_mailing(mailing_id):
 @login_required
 def update_mailing(mailing_id):
     """Оновлення розсилки"""
+    import traceback
     print(f"DEBUG: update_mailing route called with mailing_id: {mailing_id}")
     print(f"DEBUG: form data: {request.form}")
-    from database.settings_db import update_mailing_data
+    from database.settings_db import update_mailing_data, update_mailing_scheduled_time
     
     try:
         # Отримуємо дані з форми
@@ -1331,6 +1332,12 @@ def update_mailing(mailing_id):
         message_text = request.form.get('message_text', '').strip()
         media_type = request.form.get('media_type', 'none')
         media_url = request.form.get('media_url', '').strip()
+        scheduled_time = request.form.get('scheduled_time', '').strip()
+        
+        print(f"DEBUG: scheduled_time from form: '{scheduled_time}'")
+        print(f"DEBUG: scheduled_time type: {type(scheduled_time)}")
+        print(f"DEBUG: scheduled_time is empty: {scheduled_time == ''}")
+        print(f"DEBUG: scheduled_time is None: {scheduled_time is None}")
         
         if not mailing_name or not message_text:
             flash('Назва та текст розсилки не можуть бути порожніми!', 'error')
@@ -1368,6 +1375,40 @@ def update_mailing(mailing_id):
             media_url=media_url,
             inline_buttons=json.dumps(inline_buttons)
         )
+        
+        # Якщо є новий час розсилки, оновлюємо його
+        print(f"DEBUG: About to check scheduled_time: '{scheduled_time}'")
+        if scheduled_time:
+            print(f"DEBUG: scheduled_time is not empty, processing...")
+            try:
+                # Конвертуємо локальний час в UTC для збереження
+                from datetime import datetime
+                import pytz
+                
+                print(f"DEBUG: Parsing datetime from: '{scheduled_time}'")
+                local_time = datetime.fromisoformat(scheduled_time)
+                print(f"DEBUG: Parsed local_time: {local_time}")
+                
+                kyiv_tz = pytz.timezone('Europe/Kiev')
+                local_time = kyiv_tz.localize(local_time)
+                print(f"DEBUG: Localized time: {local_time}")
+                
+                utc_time = local_time.astimezone(pytz.UTC)
+                print(f"DEBUG: UTC time: {utc_time}")
+                print(f"DEBUG: UTC time ISO format: {utc_time.isoformat()}")
+                
+                time_success = update_mailing_scheduled_time(mailing_id, utc_time.isoformat())
+                if time_success:
+                    print(f"DEBUG: scheduled time updated successfully for mailing ID: {mailing_id}")
+                else:
+                    print(f"DEBUG: failed to update scheduled time for mailing ID: {mailing_id}")
+                    
+            except Exception as e:
+                print(f"ERROR updating scheduled time: {e}")
+                print(f"ERROR traceback: {traceback.format_exc()}")
+                flash('Помилка при оновленні часу розсилки!', 'error')
+        else:
+            print(f"DEBUG: scheduled_time is empty, skipping time update")
         
         if success:
             print(f"DEBUG: mailing updated successfully for ID: {mailing_id}")
