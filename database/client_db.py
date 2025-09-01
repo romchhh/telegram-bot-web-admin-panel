@@ -552,24 +552,32 @@ def get_analytics_timeseries(start_date: Optional[str] = None, end_date: Optiona
         return days
 
 
-def get_param_distribution(start_date: Optional[str] = None, end_date: Optional[str] = None) -> List[Tuple[str, int]]:
+def get_param_distribution(start_date: Optional[str] = None, end_date: Optional[str] = None, param: Optional[str] = None) -> List[Tuple[str, int]]:
     """Return (param_name, count) of users joined in date range grouped by start_param.
     Only includes users who actually joined via a param in the range.
+    Optionally filter by specific start_param.
     """
     start_iso, end_iso = _normalize_date_range(start_date, end_date)
 
     with get_connection() as conn:
         cursor = conn.cursor()
+        params: List = [start_iso, end_iso]
+        param_clause = ""
+        if param:
+            param_clause = " AND start_param = ?"
+            params.append(param)
+        
         cursor.execute(
-            """
+            f"""
             SELECT start_param, COUNT(*) as cnt
             FROM users
             WHERE start_param IS NOT NULL
               AND date(join_date) BETWEEN date(?) AND date(?)
+              {param_clause}
             GROUP BY start_param
             ORDER BY cnt DESC
             """,
-            (start_iso, end_iso)
+            tuple(params)
         )
         return [(row[0], row[1]) for row in cursor.fetchall()]
 

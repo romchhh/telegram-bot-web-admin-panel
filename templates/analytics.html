@@ -137,7 +137,14 @@
             </div>
             <div>
                 <label for="param">Метка (start)</label>
-                <input id="param" type="text" placeholder="vid1, metka..." value="{{ selected_param or '' }}">
+                <select id="param">
+                    <option value="">Всі метки</option>
+                    {% for param_name, count in all_start_params %}
+                    <option value="{{ param_name }}" {% if selected_param == param_name %}selected{% endif %}>
+                        {{ param_name }} ({{ count }})
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
             <div>
                 <button type="submit">Применить</button>

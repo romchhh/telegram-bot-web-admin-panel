@@ -15,7 +15,8 @@ from database.settings_db import (
 from database.client_db import (
     get_users_count, get_users_with_statuses, admin_update_user_status,
     get_subscription_stats, admin_delete_user,
-    get_analytics_counts, get_analytics_timeseries, get_param_distribution, get_status_distribution
+    get_analytics_counts, get_analytics_timeseries, get_param_distribution, get_status_distribution,
+    get_start_params_stats
 )
 from database.start_params_db import add_start_param, delete_start_param, get_total_start_params, get_users_with_start_params, get_start_params_stats
 from config import token
@@ -209,14 +210,18 @@ def analytics_dashboard():
 
     counts = get_analytics_counts(start_date, end_date, param)
     timeseries = get_analytics_timeseries(start_date, end_date, param)
-    param_dist = get_param_distribution(start_date, end_date)
+    param_dist = get_param_distribution(start_date, end_date, param)
+    status_dist = get_status_distribution(start_date, end_date, param)
+    # Get all available start params for dropdown
+    all_start_params = get_start_params_stats()
 
     return render_template(
         'analytics.html',
         counts=counts,
         timeseries=timeseries,
         param_dist=param_dist,
-        status_dist=get_status_distribution(start_date, end_date, param),
+        status_dist=status_dist,
+        all_start_params=all_start_params,
         start_date=start_date,
         end_date=end_date,
         selected_param=param
