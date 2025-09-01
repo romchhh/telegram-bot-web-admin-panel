@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналитика — Мини CRM</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header h1 { font-size: 1.5rem; }
+        .nav-buttons { display: flex; gap: 1rem; }
+        .nav-btn, .logout-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .logout-btn { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .filters, .card { background: white; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; align-items: end; }
+        .filters label { display: block; font-size: 0.9rem; color: #495057; margin-bottom: 0.4rem; }
+        .filters input, .filters select, .filters button { width: 100%; padding: 0.6rem; border: 1px solid #ced4da; border-radius: 8px; font-size: 0.95rem; }
+        .filters button { background: #667eea; color: white; border: none; cursor: pointer; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.2rem; border-radius: 12px; text-align: center; }
+        .stat-number { font-size: 1.8rem; font-weight: bold; margin-bottom: 0.4rem; }
+        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; }
+        @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+        .breadcrumb { background: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .breadcrumb a { color: #667eea; text-decoration: none; }
+    </style>
+    <script>
+        function qs(name) { const u = new URL(window.location.href); return u.searchParams.get(name); }
+        async function loadAnalytics() {
+            const start = qs('start_date') || '{{ start_date }}';
+            const end = qs('end_date') || '{{ end_date }}';
+            const param = qs('param') || JSON.parse('{{ (selected_param or "") | tojson }}');
+            // Summary
+            const summaryResp = await fetch(`/api/analytics/summary?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&param=${encodeURIComponent(param||'')}`);
+            const summaryJson = await summaryResp.json();
+            if (summaryJson.success) {
+                document.getElementById('joinedCount').textContent = summaryJson.data.joined;
+                document.getElementById('toPayCount').textContent = summaryJson.data.to_payment;
+                document.getElementById('paidCount').textContent = summaryJson.data.paid;
+            }
+            // Timeseries
+            const tsResp = await fetch(`/api/analytics/timeseries?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&param=${encodeURIComponent(param||'')}`);
+            const tsJson = await tsResp.json();
+            const labels = tsJson.success ? tsJson.data.map(i => i.day) : [];
+            const joined = tsJson.success ? tsJson.data.map(i => i.joined) : [];
+            const toPay = tsJson.success ? tsJson.data.map(i => i.to_payment) : [];
+            const paid = tsJson.success ? tsJson.data.map(i => i.paid) : [];
+            renderLine(labels, joined, toPay, paid);
+            // Param distribution
+            const pdResp = await fetch(`/api/analytics/params?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`);
+            const pdJson = await pdResp.json();
+            const pdLabels = pdJson.success ? pdJson.data.map(i => i.param_name || '—') : [];
+            const pdValues = pdJson.success ? pdJson.data.map(i => i.count) : [];
+            renderBar(pdLabels, pdValues);
+
+            // Status distribution
+            const sdResp = await fetch(`/api/analytics/statuses?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&param=${encodeURIComponent(param||'')}`);
+            const sdJson = await sdResp.json();
+            const sdLabels = sdJson.success ? sdJson.data.map(i => i.status || '—') : [];
+            const sdValues = sdJson.success ? sdJson.data.map(i => i.count) : [];
+            renderStatus(sdLabels, sdValues);
+        }
+        let lineChart, barChart, statusChart;
+        function renderLine(labels, joined, toPay, paid) {
+            const ctx = document.getElementById('lineChart').getContext('2d');
+            if (lineChart) lineChart.destroy();
+            lineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Зашли по меткам', data: joined, borderColor: '#667eea', backgroundColor: 'rgba(102,126,234,0.15)', fill: true, tension: 0.3 },
+                        { label: 'Перешли к оплате', data: toPay, borderColor: '#17a2b8', backgroundColor: 'rgba(23,162,184,0.15)', fill: true, tension: 0.3 },
+                        { label: 'Оплатили', data: paid, borderColor: '#28a745', backgroundColor: 'rgba(40,167,69,0.15)', fill: true, tension: 0.3 }
+                    ]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { x: { ticks: { autoSkip: true, maxTicksLimit: 10 } } } }
+            });
+        }
+        function renderBar(labels, values) {
+            const ctx = document.getElementById('barChart').getContext('2d');
+            if (barChart) barChart.destroy();
+            barChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'Зашли по меткам', data: values, backgroundColor: '#764ba2' }] },
+                options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } } }
+            });
+        }
+        function renderStatus(labels, values) {
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            if (statusChart) statusChart.destroy();
+            statusChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'Этап (с ID)', data: values, backgroundColor: '#17a2b8' }] },
+                options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } } }
+            });
+        }
+        function applyFilters(ev) {
+            ev.preventDefault();
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+            const param = document.getElementById('param').value;
+            const u = new URL(window.location.href);
+            if (start) u.searchParams.set('start_date', start);
+            if (end) u.searchParams.set('end_date', end);
+            if (param) u.searchParams.set('param', param); else u.searchParams.delete('param');
+            window.location.href = u.toString();
+        }
+        document.addEventListener('DOMContentLoaded', loadAnalytics);
+    </script>
+</head>
+<body>
+    <div class="header">
+        <h1>📈 Аналитика — Мини CRM</h1>
+        <div class="nav-buttons">
+            <a href="{{ url_for('admin_panel') }}" class="nav-btn">🏠 Главная</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_panel') }}">🏠 Главная</a> → 📈 Аналитика
+        </div>
+
+        <form class="filters" onsubmit="applyFilters(event)">
+            <div>
+                <label for="startDate">Дата с</label>
+                <input id="startDate" type="date" value="{{ start_date }}">
+            </div>
+            <div>
+                <label for="endDate">Дата по</label>
+                <input id="endDate" type="date" value="{{ end_date }}">
+            </div>
+            <div>
+                <label for="param">Метка (start)</label>
+                <input id="param" type="text" placeholder="vid1, metka..." value="{{ selected_param or '' }}">
+            </div>
+            <div>
+                <button type="submit">Применить</button>
+            </div>
+        </form>
+
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-number" id="joinedCount">—</div><div>Зашли по меткам</div></div>
+            <div class="stat-card" style="background: linear-gradient(135deg,#17a2b8,#138496)"><div class="stat-number" id="toPayCount">—</div><div>Перешли к оплате</div></div>
+            <div class="stat-card" style="background: linear-gradient(135deg,#28a745,#218838)"><div class="stat-number" id="paidCount">—</div><div>Оплатили</div></div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="card">
+                <h3 style="margin-bottom:0.7rem;color:#333">Динамика по дням</h3>
+                <canvas id="lineChart" height="140"></canvas>
+            </div>
+            <div class="card">
+                <h3 style="margin-bottom:0.7rem;color:#333">Распределение по меткам</h3>
+                <canvas id="barChart" height="140"></canvas>
+            </div>
+            <div class="card">
+                <h3 style="margin-bottom:0.7rem;color:#333">Этап (с ID)</h3>
+                <canvas id="statusChart" height="140"></canvas>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+

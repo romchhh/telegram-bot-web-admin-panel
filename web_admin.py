@@ -12,7 +12,11 @@ from database.settings_db import (
     get_tech_tariff_config, save_tech_tariff_config, get_clothes_payment_config, save_clothes_payment_config,
     get_tech_payment_config, save_tech_payment_config
 )
-from database.client_db import get_users_count, get_users_with_statuses, admin_update_user_status, get_subscription_stats, admin_delete_user
+from database.client_db import (
+    get_users_count, get_users_with_statuses, admin_update_user_status,
+    get_subscription_stats, admin_delete_user,
+    get_analytics_counts, get_analytics_timeseries, get_param_distribution, get_status_distribution
+)
 from database.start_params_db import add_start_param, delete_start_param, get_total_start_params, get_users_with_start_params, get_start_params_stats
 from config import token
 from flask import Flask, render_template, request, url_for, flash, redirect
@@ -187,6 +191,36 @@ def users_list():
                          per_page=per_page,
                          subscription_stats=subscription_stats,
                          get_stage_id_display=get_stage_id_display)
+
+
+@app.route('/analytics')
+@login_required
+def analytics_dashboard():
+    """CRM mini-dashboard: overall by tags, payment funnel, time filters."""
+    from datetime import datetime, timedelta
+    # Defaults: last 30 days
+    end_date = request.args.get('end_date')
+    start_date = request.args.get('start_date')
+    param = request.args.get('param')
+    if not end_date:
+        end_date = datetime.now().strftime('%Y-%m-%d')
+    if not start_date:
+        start_date = (datetime.now() - timedelta(days=29)).strftime('%Y-%m-%d')
+
+    counts = get_analytics_counts(start_date, end_date, param)
+    timeseries = get_analytics_timeseries(start_date, end_date, param)
+    param_dist = get_param_distribution(start_date, end_date)
+
+    return render_template(
+        'analytics.html',
+        counts=counts,
+        timeseries=timeseries,
+        param_dist=param_dist,
+        status_dist=get_status_distribution(start_date, end_date, param),
+        start_date=start_date,
+        end_date=end_date,
+        selected_param=param
+    )
 
 @app.route('/start-params', methods=['GET', 'POST'])
 @login_required
@@ -2045,6 +2079,70 @@ def api_get_stats():
     except Exception as e:
         print(f"ERROR in api_get_stats: {e}")
         return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/api/analytics/summary')
+@login_required
+def api_analytics_summary():
+    try:
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        param = request.args.get('param')
+        data = get_analytics_counts(start_date, end_date, param)
+        return jsonify({'success': True, 'data': data})
+    except Exception as e:
+        print(f"ERROR in api_analytics_summary: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analytics/timeseries')
+@login_required
+def api_analytics_timeseries():
+    try:
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        param = request.args.get('param')
+        series = get_analytics_timeseries(start_date, end_date, param)
+        # Convert tuples to dicts for JSON
+        items = [{
+            'day': d,
+            'joined': j,
+            'to_payment': p,
+            'paid': paid
+        } for (d, j, p, paid) in series]
+        return jsonify({'success': True, 'data': items})
+    except Exception as e:
+        print(f"ERROR in api_analytics_timeseries: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analytics/params')
+@login_required
+def api_analytics_params():
+    try:
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        dist = get_param_distribution(start_date, end_date)
+        items = [{'param_name': name, 'count': cnt} for (name, cnt) in dist]
+        return jsonify({'success': True, 'data': items})
+    except Exception as e:
+        print(f"ERROR in api_analytics_params: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analytics/statuses')
+@login_required
+def api_analytics_statuses():
+    try:
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        param = request.args.get('param')
+        dist = get_status_distribution(start_date, end_date, param)
+        items = [{'status': name, 'count': cnt} for (name, cnt) in dist]
+        return jsonify({'success': True, 'data': items})
+    except Exception as e:
+        print(f"ERROR in api_analytics_statuses: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 if __name__ == '__main__':
