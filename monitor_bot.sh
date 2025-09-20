@@ -42,9 +42,10 @@ start_bot() {
         log_message "Virtual environment activated"
     fi
     
-    # Start the bot in background
+    # Start the bot in background with nohup
     nohup python3 "$BOT_SCRIPT" > "bot_output.log" 2>&1 &
     BOT_PID=$!
+    log_message "Bot started with PID $BOT_PID, output redirected to bot_output.log"
     
     # Wait a moment and check if it started successfully
     sleep 5
@@ -53,6 +54,8 @@ start_bot() {
         return 0
     else
         log_message "${RED}ERROR: Failed to start $BOT_NAME${NC}"
+        log_message "Checking bot output for errors:"
+        show_bot_logs
         return 1
     fi
 }
@@ -77,6 +80,16 @@ restart_bot() {
     stop_bot
     sleep 2
     start_bot
+}
+
+# Function to show bot logs
+show_bot_logs() {
+    if [ -f "$BOT_DIR/bot_output.log" ]; then
+        echo "=== Bot Output Log (last 50 lines) ==="
+        tail -n 50 "$BOT_DIR/bot_output.log"
+    else
+        log_message "${YELLOW}No bot output log found${NC}"
+    fi
 }
 
 # Main monitoring logic
