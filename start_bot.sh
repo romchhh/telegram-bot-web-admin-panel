@@ -1,3 +1,3 @@
 #!/bin/bash
-source /root/WoldemarBot/myenv/bin/activate
-nohup python3 /root/WoldemarBot/main.py > /dev/null 2>&1 &
+source /root/telegram-bot-web-admin-panel/myenv/bin/activate
+nohup python3 /root/telegram-bot-web-admin-panel/main.py > /dev/null 2>&1 &

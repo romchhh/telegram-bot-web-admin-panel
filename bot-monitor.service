@@ -1,0 +1,16 @@
+[Unit]
+Description=WoldemarBot2 Monitor Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/telegram-bot-web-admin-panel
+ExecStart=/root/telegram-bot-web-admin-panel/monitor_bot.sh
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
