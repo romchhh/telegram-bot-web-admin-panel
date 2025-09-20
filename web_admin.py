@@ -272,7 +272,7 @@ def start_params():
                          total_users_with_params=total_users_with_params,
                          total_users=total_users,
                          start_params=start_params_data,
-                         bot_username='premium_subsy_bot')
+                         bot_username='refandgold1_bot')
 
 @app.route('/delete-start-param/<param_name>', methods=['POST'])
 @login_required
