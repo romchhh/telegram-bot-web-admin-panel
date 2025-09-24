@@ -1237,16 +1237,13 @@ def create_and_schedule_mailing_route():
             schedule_datetime = request.form.get('schedule_datetime')
             
             if schedule_datetime:
-                # Конвертуємо в київський час
-                from datetime import datetime
-                import pytz
+                # Конвертуємо київський час в UTC для збереження
+                from database.settings_db import kyiv_to_utc_time
                 
-                kyiv_tz = pytz.timezone('Europe/Kiev')
-                dt = datetime.fromisoformat(schedule_datetime)
-                kyiv_time = kyiv_tz.localize(dt)
+                utc_time_str = kyiv_to_utc_time(schedule_datetime)
                 
                 # Плануємо розсилку
-                schedule_mailing(mailing_id, kyiv_time.isoformat())
+                schedule_mailing(mailing_id, utc_time_str)
                 
                 # Перевіряємо, чи потрібно зробити розсилку повторюваною
                 is_recurring = request.form.get('is_recurring') == 'on'
@@ -1267,9 +1264,11 @@ def create_and_schedule_mailing_route():
                         recurring_success = add_recurring_mailing(mailing_id, days_str, recurring_time)
                         
                         if recurring_success:
+                            from database.settings_db import utc_to_kyiv_time
+                            kyiv_display_time = utc_to_kyiv_time(utc_time_str)
                             return jsonify({
                                 'success': True, 
-                                'message': f'Розсилка "{name}" створена, запланована на {kyiv_time.strftime("%d.%m.%Y %H:%M")} (Київ) та зроблена повторюваною!'
+                                'message': f'Розсилка "{name}" створена, запланована на {kyiv_display_time} (Київ) та зроблена повторюваною!'
                             })
                         else:
                             return jsonify({
@@ -1282,9 +1281,11 @@ def create_and_schedule_mailing_route():
                             'error': 'Для повторюваної розсилки потрібно вказати дні та час!'
                         })
                 else:
+                    from database.settings_db import utc_to_kyiv_time
+                    kyiv_display_time = utc_to_kyiv_time(utc_time_str)
                     return jsonify({
                         'success': True, 
-                        'message': f'Розсилка "{name}" створена та запланована на {kyiv_time.strftime("%d.%m.%Y %H:%M")} (Київ)!'
+                        'message': f'Розсилка "{name}" створена та запланована на {kyiv_display_time} (Київ)!'
                     })
             else:
                 return jsonify({'success': False, 'error': 'Не вказано час для планування!'})
@@ -1343,12 +1344,23 @@ def edit_mailing(mailing_id):
     """Сторінка редагування розсилки"""
     print(f"DEBUG: edit_mailing route called with mailing_id: {mailing_id}")
     from database.settings_db import get_mailing_by_id
+    from datetime import datetime
+    import pytz
     
     mailing = get_mailing_by_id(mailing_id)
     if not mailing:
         print(f"DEBUG: mailing not found for ID: {mailing_id}")
         flash('Розсилку не знайдено!', 'error')
         return redirect(url_for('mailing_settings'))
+    
+    # Конвертуємо UTC час в київський для відображення
+    if mailing.get('scheduled_at'):
+        from database.settings_db import utc_to_kyiv_time
+        mailing['scheduled_at_kyiv'] = utc_to_kyiv_time(mailing['scheduled_at'])
+        print(f"DEBUG: UTC time: {mailing['scheduled_at']}")
+        print(f"DEBUG: Kyiv time formatted: {mailing['scheduled_at_kyiv']}")
+    else:
+        mailing['scheduled_at_kyiv'] = None
     
     print(f"DEBUG: mailing found: {mailing}")
     print(f"DEBUG: mailing type: {type(mailing)}")
@@ -1420,23 +1432,14 @@ def update_mailing(mailing_id):
         if scheduled_time:
             print(f"DEBUG: scheduled_time is not empty, processing...")
             try:
-                # Конвертуємо локальний час в UTC для збереження
-                from datetime import datetime
-                import pytz
+                # Конвертуємо київський час в UTC для збереження
+                from database.settings_db import kyiv_to_utc_time
                 
                 print(f"DEBUG: Parsing datetime from: '{scheduled_time}'")
-                local_time = datetime.fromisoformat(scheduled_time)
-                print(f"DEBUG: Parsed local_time: {local_time}")
+                utc_time_str = kyiv_to_utc_time(scheduled_time)
+                print(f"DEBUG: UTC time ISO format: {utc_time_str}")
                 
-                kyiv_tz = pytz.timezone('Europe/Kiev')
-                local_time = kyiv_tz.localize(local_time)
-                print(f"DEBUG: Localized time: {local_time}")
-                
-                utc_time = local_time.astimezone(pytz.UTC)
-                print(f"DEBUG: UTC time: {utc_time}")
-                print(f"DEBUG: UTC time ISO format: {utc_time.isoformat()}")
-                
-                time_success = update_mailing_scheduled_time(mailing_id, utc_time.isoformat())
+                time_success = update_mailing_scheduled_time(mailing_id, utc_time_str)
                 if time_success:
                     print(f"DEBUG: scheduled time updated successfully for mailing ID: {mailing_id}")
                 else:
@@ -1448,6 +1451,52 @@ def update_mailing(mailing_id):
                 flash('Помилка при оновленні часу розсилки!', 'error')
         else:
             print(f"DEBUG: scheduled_time is empty, skipping time update")
+        
+        # Обработка повторяющихся рассылок
+        is_recurring = request.form.get('is_recurring') == '1'
+        recurring_time = request.form.get('recurring_time')
+        recurring_days = request.form.getlist('recurring_days[]')
+        
+        print(f"DEBUG: is_recurring: {is_recurring}, recurring_time: {recurring_time}, recurring_days: {recurring_days}")
+        
+        if is_recurring and recurring_time and recurring_days:
+            print(f"DEBUG: Processing recurring mailing update - time: {recurring_time}, days: {recurring_days}")
+            try:
+                from database.settings_db import update_recurring_mailing, add_recurring_mailing
+                
+                # Конвертируем дни в строку
+                days_str = ','.join(recurring_days)
+                
+                # Проверяем, существует ли уже повторяющаяся рассылка
+                from database.settings_db import get_mailing_by_id
+                mailing_data = get_mailing_by_id(mailing_id)
+                
+                if mailing_data and mailing_data.get('is_recurring'):
+                    # Обновляем существующую повторяющуюся рассылку
+                    recurring_success = update_recurring_mailing(mailing_id, days_str, recurring_time)
+                else:
+                    # Создаем новую повторяющуюся рассылку
+                    recurring_success = add_recurring_mailing(mailing_id, days_str, recurring_time)
+                
+                if recurring_success:
+                    print(f"DEBUG: recurring mailing updated successfully for ID: {mailing_id}")
+                else:
+                    print(f"DEBUG: failed to update recurring mailing for ID: {mailing_id}")
+                    flash('Помилка при оновленні повторюваної розсилки!', 'error')
+                    
+            except Exception as e:
+                print(f"ERROR updating recurring mailing: {e}")
+                print(f"ERROR traceback: {traceback.format_exc()}")
+                flash('Помилка при оновленні повторюваної розсилки!', 'error')
+        elif not is_recurring:
+            # Если галочка снята, удаляем повторяющуюся рассылку
+            try:
+                from database.settings_db import remove_recurring_mailing
+                remove_recurring_mailing(mailing_id)
+                print(f"DEBUG: recurring mailing removed for ID: {mailing_id}")
+            except Exception as e:
+                print(f"ERROR removing recurring mailing: {e}")
+                flash('Помилка при видаленні повторюваної розсилки!', 'error')
         
         if success:
             print(f"DEBUG: mailing updated successfully for ID: {mailing_id}")

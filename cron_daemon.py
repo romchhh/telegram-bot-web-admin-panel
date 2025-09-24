@@ -67,16 +67,22 @@ class MailingCronDaemon:
                     
                     
                     if current_time >= scheduled_at:
+                        print(f"📤 Sending mailing '{mailing_name}' (ID: {mailing_id})")
+                        print(f"   Current time: {current_time.strftime('%Y-%m-%d %H:%M:%S')} (Киев)")
+                        print(f"   Scheduled time: {scheduled_at.strftime('%Y-%m-%d %H:%M:%S')} (Киев)")
                         
                         success = await send_mailing_to_users(self.bot, mailing_id)
                         
                         if success:
                             update_mailing_status(mailing_id, 'sent')
+                            print(f"✅ Mailing '{mailing_name}' sent successfully")
                         else:
                             update_mailing_status(mailing_id, 'failed')
+                            print(f"❌ Failed to send mailing '{mailing_name}'")
                     else:
                         time_diff = scheduled_at - current_time
                         minutes_left = int(time_diff.total_seconds() / 60)
+                        print(f"⏳ Mailing '{mailing_name}' scheduled in {minutes_left} minutes")
                     
                 except Exception as e:
                     continue

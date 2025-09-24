@@ -1644,17 +1644,15 @@
         }
         
         function setCurrentKyivTime() {
-            // Встановлюємо поточний час Києва (UTC+3)
+            // Встановлюємо поточний час Києва
             const now = new Date();
-            const kyivOffset = 3; // UTC+3 для Києва
-            const kyivTime = new Date(now.getTime() + (kyivOffset * 60 * 60 * 1000));
             
-            // Форматуємо для datetime-local
-            const year = kyivTime.getUTCFullYear();
-            const month = String(kyivTime.getUTCMonth() + 1).padStart(2, '0');
-            const day = String(kyivTime.getUTCDate()).padStart(2, '0');
-            const hours = String(kyivTime.getUTCHours()).padStart(2, '0');
-            const minutes = String(kyivTime.getUTCMinutes()).padStart(2, '0');
+            // Форматуємо для datetime-local (локальний час браузера)
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
             
             const datetimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
             document.getElementById('schedule_datetime').value = datetimeString;

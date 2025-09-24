@@ -1852,3 +1852,90 @@ def delete_mailing(mailing_id: int) -> bool:
     except Exception as e:
         print(f"Error deleting mailing {mailing_id}: {e}")
         return False
+
+
+# Утилиты для работы с киевским временем
+def get_kyiv_timezone():
+    """Получить объект часового пояса Киева"""
+    return pytz.timezone('Europe/Kiev')
+
+
+def utc_to_kyiv_time(utc_time_str: str) -> str:
+    """Конвертировать UTC время в киевское для отображения"""
+    try:
+        kyiv_tz = get_kyiv_timezone()
+        
+        # Парсим UTC время
+        if 'T' in utc_time_str:
+            utc_time = datetime.fromisoformat(utc_time_str.replace('Z', '+00:00'))
+            if utc_time.tzinfo is None:
+                utc_time = pytz.utc.localize(utc_time)
+        else:
+            utc_time = datetime.strptime(utc_time_str, '%Y-%m-%d %H:%M:%S')
+            utc_time = pytz.utc.localize(utc_time)
+        
+        # Конвертируем в киевское время
+        kyiv_time = utc_time.astimezone(kyiv_tz)
+        return kyiv_time.strftime('%Y-%m-%dT%H:%M')
+        
+    except Exception as e:
+        print(f"Error converting UTC to Kyiv time: {e}")
+        return utc_time_str[:16]
+
+
+def kyiv_to_utc_time(kyiv_time_str: str) -> str:
+    """Конвертировать киевское время в UTC для сохранения"""
+    try:
+        kyiv_tz = get_kyiv_timezone()
+        
+        # Парсим киевское время
+        kyiv_time = datetime.fromisoformat(kyiv_time_str)
+        kyiv_time = kyiv_tz.localize(kyiv_time)
+        
+        # Конвертируем в UTC
+        utc_time = kyiv_time.astimezone(pytz.UTC)
+        return utc_time.isoformat()
+        
+    except Exception as e:
+        print(f"Error converting Kyiv to UTC time: {e}")
+        return kyiv_time_str
+
+
+def get_current_kyiv_time() -> datetime:
+    """Получить текущее время в Киеве"""
+    kyiv_tz = get_kyiv_timezone()
+    return datetime.now(kyiv_tz)
+
+
+def format_kyiv_time_for_display(dt: datetime) -> str:
+    """Форматировать киевское время для отображения"""
+    return dt.strftime('%Y-%m-%d %H:%M:%S (Киев)')
+
+
+def update_recurring_mailing(mailing_id: int, recurring_days: str, recurring_time: str) -> bool:
+    """Обновить настройки повторяющейся рассылки"""
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        
+        try:
+            # Обновляем данные повторяющейся рассылки
+            cursor.execute('''
+                UPDATE recurring_mailings 
+                SET recurring_days = ?, recurring_time = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE mailing_id = ? AND is_active = 1
+            ''', (recurring_days, recurring_time, mailing_id))
+            
+            if cursor.rowcount > 0:
+                # Пересчитываем следующую отправку
+                schedule_next_recurring(mailing_id)
+                conn.commit()
+                print(f"DEBUG: Updated recurring mailing for ID {mailing_id}: days={recurring_days}, time={recurring_time}")
+                return True
+            else:
+                print(f"No recurring mailing found for mailing_id: {mailing_id}")
+                return False
+                
+        except Exception as e:
+            print(f"Error updating recurring mailing: {e}")
+            conn.rollback()
+            return False
