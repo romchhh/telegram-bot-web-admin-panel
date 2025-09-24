@@ -888,9 +888,9 @@ def schedule_next_recurring(mailing_id: int) -> bool:
             
             cursor.execute('''
                 UPDATE mailings 
-                SET next_scheduled_at = ?, is_scheduled = 1, status = 'scheduled'
+                SET next_scheduled_at = ?, scheduled_at = ?, is_scheduled = 1, status = 'scheduled'
                 WHERE id = ?
-            ''', (next_scheduled_at.isoformat(), mailing_id))
+            ''', (next_scheduled_at.isoformat(), next_scheduled_at.isoformat(), mailing_id))
             
             conn.commit()
             return True
