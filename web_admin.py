@@ -1237,13 +1237,8 @@ def create_and_schedule_mailing_route():
             schedule_datetime = request.form.get('schedule_datetime')
             
             if schedule_datetime:
-                # Конвертуємо київський час в UTC для збереження
-                from database.settings_db import kyiv_to_utc_time
-                
-                utc_time_str = kyiv_to_utc_time(schedule_datetime)
-                
-                # Плануємо розсилку
-                schedule_mailing(mailing_id, utc_time_str)
+                # Зберігаємо як київський час без конвертації
+                schedule_mailing(mailing_id, schedule_datetime)
                 
                 # Перевіряємо, чи потрібно зробити розсилку повторюваною
                 is_recurring = request.form.get('is_recurring') == 'on'
@@ -1264,11 +1259,9 @@ def create_and_schedule_mailing_route():
                         recurring_success = add_recurring_mailing(mailing_id, days_str, recurring_time)
                         
                         if recurring_success:
-                            from database.settings_db import utc_to_kyiv_time
-                            kyiv_display_time = utc_to_kyiv_time(utc_time_str)
                             return jsonify({
                                 'success': True, 
-                                'message': f'Розсилка "{name}" створена, запланована на {kyiv_display_time} (Київ) та зроблена повторюваною!'
+                                'message': f'Розсилка "{name}" створена, запланована на {schedule_datetime} (Київ) та зроблена повторюваною!'
                             })
                         else:
                             return jsonify({
@@ -1281,11 +1274,9 @@ def create_and_schedule_mailing_route():
                             'error': 'Для повторюваної розсилки потрібно вказати дні та час!'
                         })
                 else:
-                    from database.settings_db import utc_to_kyiv_time
-                    kyiv_display_time = utc_to_kyiv_time(utc_time_str)
                     return jsonify({
                         'success': True, 
-                        'message': f'Розсилка "{name}" створена та запланована на {kyiv_display_time} (Київ)!'
+                        'message': f'Розсилка "{name}" створена та запланована на {schedule_datetime} (Київ)!'
                     })
             else:
                 return jsonify({'success': False, 'error': 'Не вказано час для планування!'})
