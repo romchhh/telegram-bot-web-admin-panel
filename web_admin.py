@@ -1354,27 +1354,36 @@ def edit_mailing(mailing_id):
         return redirect(url_for('mailing_settings'))
     
     # Заповнюємо UI-поля: день тижня + час (за Києвом)
-    from database.settings_db import utc_to_kyiv_time
-    mailing['scheduled_at_kyiv'] = None
-    mailing['ui_time'] = None
-    mailing['ui_weekday'] = None  # 0=Mon ... 6=Sun
+    mailing['ui_time'] = '12:00'
+    mailing['ui_weekday'] = 0  # Понеділок за замовчуванням
     try:
         if mailing.get('is_recurring') and mailing.get('recurring_time'):
             mailing['ui_time'] = mailing['recurring_time']
             # Якщо один день, беремо його; якщо декілька — беремо перший
             if mailing.get('recurring_days'):
                 days_list = str(mailing['recurring_days']).split(',')
-                mailing['ui_weekday'] = int(days_list[0]) if days_list and days_list[0] != '' else None
+                mailing['ui_weekday'] = int(days_list[0]) if days_list and days_list[0] != '' else 0
         elif mailing.get('scheduled_at'):
-            kyiv_iso = utc_to_kyiv_time(mailing['scheduled_at'])  # YYYY-MM-DDTHH:MM
-            mailing['scheduled_at_kyiv'] = kyiv_iso
-            mailing['ui_time'] = kyiv_iso[11:16]
-            from datetime import datetime
-            import pytz
-            kyiv = pytz.timezone('Europe/Kiev')
-            dt = datetime.strptime(kyiv_iso, '%Y-%m-%dT%H:%M')
-            dt = kyiv.localize(dt)
-            mailing['ui_weekday'] = dt.weekday()
+            # Читаємо час з бази (тепер зберігаємо в київському форматі)
+            scheduled_str = mailing['scheduled_at']
+            if 'T' in scheduled_str:
+                # Формат: 2024-01-15T14:30 (київський час)
+                mailing['ui_time'] = scheduled_str[11:16]
+                from datetime import datetime
+                dt = datetime.strptime(scheduled_str, '%Y-%m-%dT%H:%M')
+                mailing['ui_weekday'] = dt.weekday()
+            else:
+                # Старий формат - спробуємо конвертувати
+                from datetime import datetime
+                import pytz
+                kyiv = pytz.timezone('Europe/Kiev')
+                try:
+                    dt = datetime.strptime(scheduled_str, '%Y-%m-%d %H:%M:%S')
+                    dt = kyiv.localize(dt)
+                    mailing['ui_time'] = dt.strftime('%H:%M')
+                    mailing['ui_weekday'] = dt.weekday()
+                except:
+                    pass
     except Exception as e:
         print(f"WARN: failed to derive UI weekday/time: {e}")
     
@@ -1443,28 +1452,25 @@ def update_mailing(mailing_id):
             inline_buttons=json.dumps(inline_buttons)
         )
         
-        # Обчислюємо найближчу дату (Київ) за вибраним днем тижня і часом, та зберігаємо як UTC
+        # Обчислюємо найближчу дату (Київ) за вибраним днем тижня і часом, та зберігаємо як київський час
         if ui_weekday_raw and ui_time:
             try:
                 from datetime import datetime, timedelta
-                import pytz
-                from database.settings_db import kyiv_to_utc_time
-                kyiv = pytz.timezone('Europe/Kiev')
                 target_weekday = int(ui_weekday_raw)
                 hour, minute = map(int, ui_time.split(':'))
-                now_kyiv = datetime.now(kyiv)
+                now = datetime.now()
                 # Початкова кандидат дата — сьогодні з цим часом
-                candidate = now_kyiv.replace(hour=hour, minute=minute, second=0, microsecond=0)
+                candidate = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
                 # Зсув до потрібного дня тижня (0=Mon)
                 days_ahead = (target_weekday - candidate.weekday()) % 7
                 candidate = candidate + timedelta(days=days_ahead)
                 # Якщо кандидат у минулому, пересуваємо на тиждень вперед
-                if candidate <= now_kyiv:
+                if candidate <= now:
                     candidate = candidate + timedelta(days=7)
-                # Перетворення у UTC ISO
-                utc_time_str = candidate.astimezone(pytz.UTC).isoformat()
-                if update_mailing_scheduled_time(mailing_id, utc_time_str):
-                    print(f"DEBUG: scheduled_at set to {utc_time_str} for mailing ID: {mailing_id}")
+                # Зберігаємо як київський час у форматі YYYY-MM-DDTHH:MM
+                kyiv_time_str = candidate.strftime('%Y-%m-%dT%H:%M')
+                if update_mailing_scheduled_time(mailing_id, kyiv_time_str):
+                    print(f"DEBUG: scheduled_at set to {kyiv_time_str} (Kyiv) for mailing ID: {mailing_id}")
                 else:
                     print(f"DEBUG: failed to set scheduled_at for mailing ID: {mailing_id}")
             except Exception as e:
@@ -1473,25 +1479,29 @@ def update_mailing(mailing_id):
                 flash('Помилка при обчисленні часу розсилки!', 'error')
         
         # Обработка повторяющихся рассылок на основе одного дня тижня + часу
-        if ui_weekday_raw and ui_time:
-            try:
-                from database.settings_db import update_recurring_mailing, add_recurring_mailing, get_mailing_by_id, remove_recurring_mailing, schedule_next_recurring
+        try:
+            from database.settings_db import update_recurring_mailing, add_recurring_mailing, get_mailing_by_id, remove_recurring_mailing, schedule_next_recurring
+            
+            if is_recurring and ui_weekday_raw and ui_time:
                 days_str = str(int(ui_weekday_raw))
-                if is_recurring:
-                    mailing_data = get_mailing_by_id(mailing_id)
-                    if mailing_data and mailing_data.get('is_recurring'):
-                        recurring_success = update_recurring_mailing(mailing_id, days_str, ui_time)
-                    else:
-                        recurring_success = add_recurring_mailing(mailing_id, days_str, ui_time)
-                    if recurring_success:
-                        # Одразу перерахувати наступну дату
-                        schedule_next_recurring(mailing_id)
+                mailing_data = get_mailing_by_id(mailing_id)
+                if mailing_data and mailing_data.get('is_recurring'):
+                    recurring_success = update_recurring_mailing(mailing_id, days_str, ui_time)
                 else:
-                    # Вимикаємо повторення
-                    remove_recurring_mailing(mailing_id)
-            except Exception as e:
-                print(f"ERROR handling recurring settings: {e}")
-                print(f"ERROR traceback: {traceback.format_exc()}")
+                    recurring_success = add_recurring_mailing(mailing_id, days_str, ui_time)
+                if recurring_success:
+                    # Одразу перерахувати наступну дату
+                    schedule_next_recurring(mailing_id)
+                    print(f"DEBUG: Recurring mailing enabled for ID: {mailing_id}")
+                else:
+                    print(f"DEBUG: Failed to enable recurring mailing for ID: {mailing_id}")
+            else:
+                # Вимикаємо повторення
+                remove_recurring_mailing(mailing_id)
+                print(f"DEBUG: Recurring mailing disabled for ID: {mailing_id}")
+        except Exception as e:
+            print(f"ERROR handling recurring settings: {e}")
+            print(f"ERROR traceback: {traceback.format_exc()}")
         
         if success:
             print(f"DEBUG: mailing updated successfully for ID: {mailing_id}")

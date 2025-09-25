@@ -38,7 +38,8 @@ class MailingCronDaemon:
     
     async def check_and_send_scheduled_mailings(self):
         try:
-            current_time = datetime.now(self.kyiv_tz)
+            # Використовуємо локальний час (київський)
+            current_time = datetime.now()
             
             scheduled_mailings = get_scheduled_mailings()
             
@@ -56,15 +57,11 @@ class MailingCronDaemon:
                     continue
                 
                 try:
+                    # Парсимо київський час у форматі YYYY-MM-DDTHH:MM
                     if 'T' in scheduled_at_str:
-                        scheduled_at = datetime.fromisoformat(scheduled_at_str.replace('Z', '+00:00'))
-                        if scheduled_at.tzinfo is None:
-                            scheduled_at = pytz.utc.localize(scheduled_at)
-                        scheduled_at = scheduled_at.astimezone(self.kyiv_tz)
+                        scheduled_at = datetime.strptime(scheduled_at_str, '%Y-%m-%dT%H:%M')
                     else:
                         scheduled_at = datetime.strptime(scheduled_at_str, '%Y-%m-%d %H:%M:%S')
-                        scheduled_at = self.kyiv_tz.localize(scheduled_at)
-                    
                     
                     if current_time >= scheduled_at:
                         print(f"📤 Sending mailing '{mailing_name}' (ID: {mailing_id})")
@@ -76,6 +73,13 @@ class MailingCronDaemon:
                         if success:
                             update_mailing_status(mailing_id, 'sent')
                             print(f"✅ Mailing '{mailing_name}' sent successfully")
+                            
+                            # Якщо це повторювана розсилка, пересчитываем наступну
+                            from database.settings_db import get_mailing_by_id, schedule_next_recurring
+                            mailing_data = get_mailing_by_id(mailing_id)
+                            if mailing_data and mailing_data.get('is_recurring'):
+                                print(f"🔄 Rescheduling recurring mailing '{mailing_name}'")
+                                schedule_next_recurring(mailing_id)
                         else:
                             update_mailing_status(mailing_id, 'failed')
                             print(f"❌ Failed to send mailing '{mailing_name}'")
@@ -85,6 +89,7 @@ class MailingCronDaemon:
                         print(f"⏳ Mailing '{mailing_name}' scheduled in {minutes_left} minutes")
                     
                 except Exception as e:
+                    print(f"❌ Error processing mailing {mailing_id}: {e}")
                     continue
                     
         except Exception as e:

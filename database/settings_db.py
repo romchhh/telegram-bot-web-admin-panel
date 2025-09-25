@@ -852,10 +852,9 @@ def schedule_next_recurring(mailing_id: int) -> bool:
             return False
         
         from datetime import datetime, timedelta
-        import pytz
         
-        kyiv_tz = pytz.timezone('Europe/Kiev')
-        now = datetime.now(kyiv_tz)
+        # Використовуємо локальний час (київський)
+        now = datetime.now()
         
         try:
             hour, minute = map(int, recurring_time.split(':'))
@@ -879,18 +878,20 @@ def schedule_next_recurring(mailing_id: int) -> bool:
         
         if next_dates:
             next_scheduled_at = min(next_dates)
+            # Зберігаємо як київський час у форматі YYYY-MM-DDTHH:MM
+            kyiv_time_str = next_scheduled_at.strftime('%Y-%m-%dT%H:%M')
             
             cursor.execute('''
                 UPDATE recurring_mailings 
                 SET next_scheduled_at = ?
                 WHERE mailing_id = ?
-            ''', (next_scheduled_at.isoformat(), mailing_id))
+            ''', (kyiv_time_str, mailing_id))
             
             cursor.execute('''
                 UPDATE mailings 
                 SET next_scheduled_at = ?, scheduled_at = ?, is_scheduled = 1, status = 'scheduled'
                 WHERE id = ?
-            ''', (next_scheduled_at.isoformat(), next_scheduled_at.isoformat(), mailing_id))
+            ''', (kyiv_time_str, kyiv_time_str, mailing_id))
             
             conn.commit()
             return True

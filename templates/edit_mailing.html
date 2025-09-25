@@ -428,6 +428,36 @@
                            placeholder="Название рассылки" value="{{ mailing.name }}" required>
                 </div>
                 
+                <!-- Планування розсилки - день тижня + час + повторити -->
+                <div class="form-group">
+                    <label>📅 Планування розсилки:</label>
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <div>
+                            <label for="ui_weekday">День тижня:</label>
+                            <select id="ui_weekday" name="ui_weekday" required>
+                                <option value="0" {% if mailing.ui_weekday == 0 %}selected{% endif %}>Понеділок</option>
+                                <option value="1" {% if mailing.ui_weekday == 1 %}selected{% endif %}>Вівторок</option>
+                                <option value="2" {% if mailing.ui_weekday == 2 %}selected{% endif %}>Середа</option>
+                                <option value="3" {% if mailing.ui_weekday == 3 %}selected{% endif %}>Четвер</option>
+                                <option value="4" {% if mailing.ui_weekday == 4 %}selected{% endif %}>П'ятниця</option>
+                                <option value="5" {% if mailing.ui_weekday == 5 %}selected{% endif %}>Субота</option>
+                                <option value="6" {% if mailing.ui_weekday == 6 %}selected{% endif %}>Неділя</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="ui_time">Час (Київ):</label>
+                            <input type="time" id="ui_time" name="ui_time" value="{{ mailing.ui_time or '12:00' }}" required>
+                        </div>
+                        <div>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" name="is_recurring" value="1" {% if mailing.is_recurring %}checked{% endif %}>
+                                <strong>🔄 Повторювати щотижня</strong>
+                            </label>
+                        </div>
+                    </div>
+                    <small>Виберіть день тижня та час для розсилки. Якщо увімкнено повтор - розсилка буде відправлятися щотижня в цей день і час.</small>
+                </div>
+
                 <div class="form-group">
                     <label for="message_text">Текст сообщения:</label>
                     <textarea id="message_text" name="message_text" 
@@ -462,88 +492,6 @@
                     </div>
                 </div>
                 
-                <!-- DEBUG: mailing.scheduled_at = {{ mailing.scheduled_at }}, mailing.is_scheduled = {{ mailing.is_scheduled }} -->
-                <!-- DEBUG: scheduled_at is defined: {{ mailing.scheduled_at is defined }} -->
-                <!-- DEBUG: is_scheduled is defined: {{ mailing.is_scheduled is defined }} -->
-                {% if mailing.scheduled_at and mailing.is_scheduled %}
-                <div class="form-group">
-                    <label for="scheduled_time">🕐 Время отправки (Киев):</label>
-                    <input type="datetime-local" id="scheduled_time" name="scheduled_time" 
-                           value="{{ mailing.scheduled_at_kyiv }}" required>
-                    <small>Измените время отправки запланированной рассылки (время по Киеву)</small>
-                </div>
-                {% else %}
-                <!-- DEBUG: Field not shown because scheduled_at or is_scheduled is falsy -->
-                <!-- DEBUG: scheduled_at value: "{{ mailing.scheduled_at }}" -->
-                <!-- DEBUG: is_scheduled value: "{{ mailing.is_scheduled }}" -->
-                <!-- DEBUG: scheduled_at type: {{ mailing.scheduled_at.__class__.__name__ if mailing.scheduled_at else 'None' }} -->
-                <!-- DEBUG: is_scheduled type: {{ mailing.is_scheduled.__class__.__name__ if mailing.is_scheduled is defined else 'Not defined' }} -->
-                {% endif %}
-                
-                {% if mailing.is_recurring %}
-                <div class="form-group">
-                    <label for="recurring_time">🕐 Время повторяющейся рассылки (Киев):</label>
-                    <input type="time" id="recurring_time" name="recurring_time" 
-                           value="{{ mailing.recurring_time }}" required>
-                    <small>Время отправки повторяющейся рассылки по Киеву</small>
-                </div>
-                
-                <div class="form-group">
-                    <label>📅 Дни недели для повторения:</label>
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
-                        {% set days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'] %}
-                        {% set day_numbers = [0, 1, 2, 3, 4, 5, 6] %}
-                        {% set current_days = mailing.recurring_days.split(',') if mailing.recurring_days else [] %}
-                        {% for i in range(7) %}
-                            <label style="display: flex; align-items: center; gap: 5px;">
-                                <input type="checkbox" name="recurring_days[]" value="{{ day_numbers[i] }}" 
-                                       {% if day_numbers[i]|string in current_days %}checked{% endif %}>
-                                {{ days[i] }}
-                            </label>
-                        {% endfor %}
-                    </div>
-                    <small>Выберите дни недели для повторения рассылки</small>
-                </div>
-                
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" name="is_recurring" value="1" checked>
-                        <strong>🔄 Повторяющаяся рассылка</strong>
-                    </label>
-                    <small>Включить автоматическое повторение рассылки в выбранные дни</small>
-                </div>
-                {% else %}
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" name="is_recurring" value="1" id="is_recurring_checkbox" onchange="toggleRecurringFields()">
-                        <strong>🔄 Сделать повторяющейся рассылкой</strong>
-                    </label>
-                    <small>Включить автоматическое повторение рассылки</small>
-                </div>
-                
-                <div id="recurring_fields" style="display: none;">
-                    <div class="form-group">
-                        <label for="recurring_time_new">🕐 Время повторяющейся рассылки (Киев):</label>
-                        <input type="time" id="recurring_time_new" name="recurring_time" required>
-                        <small>Время отправки повторяющейся рассылки по Киеву</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>📅 Дни недели для повторения:</label>
-                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
-                            {% set days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'] %}
-                            {% set day_numbers = [0, 1, 2, 3, 4, 5, 6] %}
-                            {% for i in range(7) %}
-                                <label style="display: flex; align-items: center; gap: 5px;">
-                                    <input type="checkbox" name="recurring_days[]" value="{{ day_numbers[i] }}">
-                                    {{ days[i] }}
-                                </label>
-                            {% endfor %}
-                        </div>
-                        <small>Выберите дни недели для повторения рассылки</small>
-                    </div>
-                </div>
-                {% endif %}
                 
                 <div id="media_preview" class="media-preview" style="display: none;">
                     <strong>Попередній перегляд:</strong>
@@ -732,21 +680,21 @@
             }
             
             // Валидация для повторяющихся рассылок
-            const isRecurringCheckbox = document.getElementById('is_recurring_checkbox');
-            const recurringTime = document.getElementById('recurring_time') || document.getElementById('recurring_time_new');
-            const recurringDays = document.querySelectorAll('input[name="recurring_days[]"]:checked');
+            const isRecurringCheckbox = document.querySelector('input[name="is_recurring"]');
+            const uiTime = document.getElementById('ui_time');
+            const uiWeekday = document.getElementById('ui_weekday');
             
-            // Проверяем, если это повторяющаяся рассылка или если пользователь выбрал сделать её повторяющейся
-            const isRecurring = isRecurringCheckbox ? isRecurringCheckbox.checked : true;
+            // Проверяем, если это повторяющаяся рассылка
+            const isRecurring = isRecurringCheckbox ? isRecurringCheckbox.checked : false;
             
             if (isRecurring) {
-                if (!recurringTime || !recurringTime.value) {
+                if (!uiTime || !uiTime.value) {
                     alert('Пожалуйста, укажите время для повторяющейся рассылки');
                     return false;
                 }
                 
-                if (recurringDays.length === 0) {
-                    alert('Пожалуйста, выберите хотя бы один день недели для повторяющейся рассылки');
+                if (!uiWeekday || !uiWeekday.value) {
+                    alert('Пожалуйста, выберите день недели для повторяющейся рассылки');
                     return false;
                 }
             }
