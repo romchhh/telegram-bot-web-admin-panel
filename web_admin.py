@@ -1375,6 +1375,25 @@ def edit_mailing(mailing_id):
                     mailing['ui_weekday'] = dt.weekday()
                 except:
                     pass
+        # Підготовка created_at у київському відображенні
+        created_raw = mailing.get('created_at')
+        mailing['created_at_kyiv'] = created_raw
+        try:
+            if created_raw:
+                from datetime import datetime
+                # Підтримка форматів 'YYYY-MM-DD HH:MM:SS' та 'YYYY-MM-DDTHH:MM'
+                dt = None
+                try:
+                    dt = datetime.strptime(created_raw, '%Y-%m-%d %H:%M:%S')
+                except Exception:
+                    try:
+                        dt = datetime.strptime(created_raw[:16], '%Y-%m-%dT%H:%M')
+                    except Exception:
+                        dt = None
+                if dt:
+                    mailing['created_at_kyiv'] = dt.strftime('%Y-%m-%d %H:%M:%S')
+        except Exception:
+            pass
     except Exception as e:
         print(f"WARN: failed to derive UI weekday/time: {e}")
     

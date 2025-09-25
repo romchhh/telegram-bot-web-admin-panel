@@ -404,7 +404,7 @@
                     <span style="color: #6c757d;">📝 Создана</span>
                 {% endif %}
                 <br>
-                <strong>Створено:</strong> {{ mailing.created_at }}
+                <strong>Створено:</strong> {{ mailing.created_at_kyiv or mailing.created_at }} (Київ)
                 {% if mailing.is_recurring %}
                 <br><strong>Повторяющаяся рассылка:</strong><br>
                 <strong>Дни недели:</strong> {{ mailing.recurring_days }}<br>
