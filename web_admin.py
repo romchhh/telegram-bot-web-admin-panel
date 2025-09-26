@@ -1344,7 +1344,7 @@ def edit_mailing(mailing_id):
         flash('Розсилку не знайдено!', 'error')
         return redirect(url_for('mailing_settings'))
     
-    # Заповнюємо UI-поля: день тижня + час (за Києвом)
+            # Заповнюємо UI-поля: день тижня + час (за Києвом)
     mailing['ui_time'] = '12:00'
     mailing['ui_weekday'] = 0  # Понеділок за замовчуванням
     try:
@@ -1377,23 +1377,23 @@ def edit_mailing(mailing_id):
                     pass
         # Підготовка created_at у київському відображенні
         created_raw = mailing.get('created_at')
-        mailing['created_at_kyiv'] = created_raw
-        try:
-            if created_raw:
+        if created_raw:
+            try:
                 from datetime import datetime
-                # Підтримка форматів 'YYYY-MM-DD HH:MM:SS' та 'YYYY-MM-DDTHH:MM'
-                dt = None
-                try:
-                    dt = datetime.strptime(created_raw, '%Y-%m-%d %H:%M:%S')
-                except Exception:
-                    try:
-                        dt = datetime.strptime(created_raw[:16], '%Y-%m-%dT%H:%M')
-                    except Exception:
-                        dt = None
-                if dt:
+                # Парсимо created_at як київський час
+                if 'T' in created_raw:
+                    # Формат: 2024-01-15T14:30
+                    dt = datetime.strptime(created_raw[:16], '%Y-%m-%dT%H:%M')
                     mailing['created_at_kyiv'] = dt.strftime('%Y-%m-%d %H:%M:%S')
-        except Exception:
-            pass
+                else:
+                    # Формат: 2024-01-15 14:30:00
+                    dt = datetime.strptime(created_raw, '%Y-%m-%d %H:%M:%S')
+                    mailing['created_at_kyiv'] = dt.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception as e:
+                print(f"WARN: failed to parse created_at '{created_raw}': {e}")
+                mailing['created_at_kyiv'] = created_raw
+        else:
+            mailing['created_at_kyiv'] = created_raw
     except Exception as e:
         print(f"WARN: failed to derive UI weekday/time: {e}")
     
@@ -1462,8 +1462,31 @@ def update_mailing(mailing_id):
             inline_buttons=json.dumps(inline_buttons)
         )
         
-        # Обчислюємо найближчу дату (Київ) за вибраним днем тижня і часом, та зберігаємо як київський час
-        if ui_weekday_raw and ui_time:
+        # Обработка повторяющихся рассылок на основе одного дня тижня + часу
+        try:
+            from database.settings_db import update_recurring_mailing, add_recurring_mailing, get_mailing_by_id, remove_recurring_mailing, schedule_next_recurring
+            
+            if is_recurring and ui_weekday_raw and ui_time:
+                days_str = str(int(ui_weekday_raw))
+                mailing_data = get_mailing_by_id(mailing_id)
+                if mailing_data and mailing_data.get('is_recurring'):
+                    recurring_success = update_recurring_mailing(mailing_id, days_str, ui_time)
+                else:
+                    recurring_success = add_recurring_mailing(mailing_id, days_str, ui_time)
+                if recurring_success:
+                    print(f"DEBUG: Recurring mailing enabled for ID: {mailing_id}")
+                else:
+                    print(f"DEBUG: Failed to enable recurring mailing for ID: {mailing_id}")
+            elif not is_recurring:
+                # Вимикаємо повторення
+                remove_recurring_mailing(mailing_id)
+                print(f"DEBUG: Recurring mailing disabled for ID: {mailing_id}")
+        except Exception as e:
+            print(f"ERROR handling recurring settings: {e}")
+            print(f"ERROR traceback: {traceback.format_exc()}")
+        
+        # Для звичайних розсилок (без повтора) встановлюємо scheduled_at
+        if not is_recurring and ui_weekday_raw and ui_time:
             try:
                 from datetime import datetime, timedelta
                 target_weekday = int(ui_weekday_raw)
@@ -1480,38 +1503,22 @@ def update_mailing(mailing_id):
                 # Зберігаємо як київський час у форматі YYYY-MM-DDTHH:MM
                 kyiv_time_str = candidate.strftime('%Y-%m-%dT%H:%M')
                 if update_mailing_scheduled_time(mailing_id, kyiv_time_str):
-                    print(f"DEBUG: scheduled_at set to {kyiv_time_str} (Kyiv) for mailing ID: {mailing_id}")
+                    print(f"DEBUG: scheduled_at set to {kyiv_time_str} for mailing ID: {mailing_id}")
                 else:
                     print(f"DEBUG: failed to set scheduled_at for mailing ID: {mailing_id}")
+                
+                # Встановлюємо статус запланованої
+                from database.settings_db import update_mailing_status, get_connection
+                update_mailing_status(mailing_id, 'scheduled')
+                with get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute('UPDATE mailings SET is_scheduled = 1 WHERE id = ?', (mailing_id,))
+                    conn.commit()
+                print(f"DEBUG: Mailing {mailing_id} status set to scheduled and is_scheduled = 1")
             except Exception as e:
                 print(f"ERROR computing next occurrence: {e}")
                 print(f"ERROR traceback: {traceback.format_exc()}")
                 flash('Помилка при обчисленні часу розсилки!', 'error')
-        
-        # Обработка повторяющихся рассылок на основе одного дня тижня + часу
-        try:
-            from database.settings_db import update_recurring_mailing, add_recurring_mailing, get_mailing_by_id, remove_recurring_mailing, schedule_next_recurring
-            
-            if is_recurring and ui_weekday_raw and ui_time:
-                days_str = str(int(ui_weekday_raw))
-                mailing_data = get_mailing_by_id(mailing_id)
-                if mailing_data and mailing_data.get('is_recurring'):
-                    recurring_success = update_recurring_mailing(mailing_id, days_str, ui_time)
-                else:
-                    recurring_success = add_recurring_mailing(mailing_id, days_str, ui_time)
-                if recurring_success:
-                    # Одразу перерахувати наступну дату
-                    schedule_next_recurring(mailing_id)
-                    print(f"DEBUG: Recurring mailing enabled for ID: {mailing_id}")
-                else:
-                    print(f"DEBUG: Failed to enable recurring mailing for ID: {mailing_id}")
-            else:
-                # Вимикаємо повторення
-                remove_recurring_mailing(mailing_id)
-                print(f"DEBUG: Recurring mailing disabled for ID: {mailing_id}")
-        except Exception as e:
-            print(f"ERROR handling recurring settings: {e}")
-            print(f"ERROR traceback: {traceback.format_exc()}")
         
         if success:
             print(f"DEBUG: mailing updated successfully for ID: {mailing_id}")

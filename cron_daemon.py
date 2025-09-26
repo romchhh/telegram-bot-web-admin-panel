@@ -38,7 +38,7 @@ class MailingCronDaemon:
     
     async def check_and_send_scheduled_mailings(self):
         try:
-            # Використовуємо локальний час (київський)
+                # Використовуємо локальний час (київський)
             current_time = datetime.now()
             
             scheduled_mailings = get_scheduled_mailings()
@@ -63,10 +63,10 @@ class MailingCronDaemon:
                     else:
                         scheduled_at = datetime.strptime(scheduled_at_str, '%Y-%m-%d %H:%M:%S')
                     
-                    if current_time >= scheduled_at:
-                        print(f"📤 Sending mailing '{mailing_name}' (ID: {mailing_id})")
-                        print(f"   Current time: {current_time.strftime('%Y-%m-%d %H:%M:%S')} (Киев)")
-                        print(f"   Scheduled time: {scheduled_at.strftime('%Y-%m-%d %H:%M:%S')} (Киев)")
+                        if current_time >= scheduled_at:
+                            print(f"📤 Sending mailing '{mailing_name}' (ID: {mailing_id})")
+                            print(f"   Current time: {current_time.strftime('%Y-%m-%d %H:%M:%S')} (Киев)")
+                            print(f"   Scheduled time: {scheduled_at.strftime('%Y-%m-%d %H:%M:%S')} (Киев)")
                         
                         success = await send_mailing_to_users(self.bot, mailing_id)
                         
