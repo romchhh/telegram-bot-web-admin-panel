@@ -3,7 +3,6 @@ import time
 import sys
 import os
 from datetime import datetime
-import pytz
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -19,7 +18,6 @@ class MailingCronDaemon:
     def __init__(self, token: str):
         self.token = token
         self.bot = None
-        self.kyiv_tz = pytz.timezone('Europe/Kiev')
         
     async def init_bot(self):
         try:
@@ -38,8 +36,9 @@ class MailingCronDaemon:
     
     async def check_and_send_scheduled_mailings(self):
         try:
-                # Використовуємо локальний час (київський)
+            # Використовуємо локальний час (київський)
             current_time = datetime.now()
+            print(f"🕐 Cron check at: {current_time.strftime('%Y-%m-%d %H:%M:%S')} (Киев)")
             
             scheduled_mailings = get_scheduled_mailings()
             
@@ -47,44 +46,58 @@ class MailingCronDaemon:
                 print("📭 No scheduled mailings found")
                 return
             
+            print(f"📋 Found {len(scheduled_mailings)} scheduled mailings")
+            
             
             for mailing in scheduled_mailings:
                 mailing_id = mailing[0]
                 mailing_name = mailing[1]
                 scheduled_at_str = mailing[10]  # scheduled_at
+                is_recurring = mailing[13]  # is_recurring
+                
+                print(f"📧 Checking mailing '{mailing_name}' (ID: {mailing_id})")
+                print(f"   Scheduled at: {scheduled_at_str}")
+                print(f"   Is recurring: {is_recurring}")
                 
                 if not scheduled_at_str:
+                    print(f"   ⚠️ No scheduled_at time")
                     continue
                 
                 try:
                     # Парсимо київський час у форматі YYYY-MM-DDTHH:MM
                     if 'T' in scheduled_at_str:
+                        if '+00:00' in scheduled_at_str:
+                            # Убираем UTC offset
+                            scheduled_at_str = scheduled_at_str.replace('+00:00', '')
                         scheduled_at = datetime.strptime(scheduled_at_str, '%Y-%m-%dT%H:%M')
                     else:
                         scheduled_at = datetime.strptime(scheduled_at_str, '%Y-%m-%d %H:%M:%S')
                     
-                        if current_time >= scheduled_at:
-                            print(f"📤 Sending mailing '{mailing_name}' (ID: {mailing_id})")
-                            print(f"   Current time: {current_time.strftime('%Y-%m-%d %H:%M:%S')} (Киев)")
-                            print(f"   Scheduled time: {scheduled_at.strftime('%Y-%m-%d %H:%M:%S')} (Киев)")
+                    # Сравниваем время с точностью до минуты
+                    current_time_minutes = current_time.replace(second=0, microsecond=0)
+                    scheduled_at_minutes = scheduled_at.replace(second=0, microsecond=0)
+                    
+                    if current_time_minutes >= scheduled_at_minutes:
+                        print(f"📤 Sending mailing '{mailing_name}' (ID: {mailing_id})")
+                        print(f"   Current time: {current_time_minutes.strftime('%Y-%m-%d %H:%M')} (Киев)")
+                        print(f"   Scheduled time: {scheduled_at_minutes.strftime('%Y-%m-%d %H:%M')} (Киев)")
                         
                         success = await send_mailing_to_users(self.bot, mailing_id)
                         
                         if success:
-                            update_mailing_status(mailing_id, 'sent')
-                            print(f"✅ Mailing '{mailing_name}' sent successfully")
-                            
-                            # Якщо це повторювана розсилка, пересчитываем наступну
-                            from database.settings_db import get_mailing_by_id, schedule_next_recurring
+                            # Для обычных рассылок обновляем статус на 'sent'
+                            # Для повторяющихся рассылок schedule_next_recurring уже вызывается в send_mailing_to_users
+                            from database.settings_db import get_mailing_by_id
                             mailing_data = get_mailing_by_id(mailing_id)
-                            if mailing_data and mailing_data.get('is_recurring'):
-                                print(f"🔄 Rescheduling recurring mailing '{mailing_name}'")
-                                schedule_next_recurring(mailing_id)
+                            if not mailing_data.get('is_recurring'):
+                                update_mailing_status(mailing_id, 'sent')
+                            
+                            print(f"✅ Mailing '{mailing_name}' sent successfully")
                         else:
                             update_mailing_status(mailing_id, 'failed')
                             print(f"❌ Failed to send mailing '{mailing_name}'")
                     else:
-                        time_diff = scheduled_at - current_time
+                        time_diff = scheduled_at_minutes - current_time_minutes
                         minutes_left = int(time_diff.total_seconds() / 60)
                         print(f"⏳ Mailing '{mailing_name}' scheduled in {minutes_left} minutes")
                     

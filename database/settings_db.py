@@ -874,18 +874,40 @@ def schedule_next_recurring(mailing_id: int) -> bool:
             return False
         
         next_dates = []
+        print(f"🔍 DEBUG: Current time: {now.strftime('%Y-%m-%d %H:%M:%S')} (weekday: {now.weekday()})")
+        print(f"🔍 DEBUG: Target days: {days}, time: {hour}:{minute:02d}")
+        
         for target_day in days:
-            for day_offset in range(1, 8):
+            # Сначала проверяем сегодняшний день
+            if now.weekday() == target_day:
+                today_date = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+                print(f"🔍 DEBUG: Today is target day {target_day}, today_date: {today_date}")
+                # Если время еще не наступило сегодня, планируем на сегодня
+                if today_date > now:
+                    print(f"🔍 DEBUG: Time hasn't passed today, scheduling for today")
+                    next_dates.append(today_date)
+                    continue
+                else:
+                    print(f"🔍 DEBUG: Time has passed today, looking for next occurrence")
+            
+            # Если сегодня не подходит, ищем в ближайшие 2 недели
+            for day_offset in range(1, 15):
                 check_date = now + timedelta(days=day_offset)
                 if check_date.weekday() == target_day:
                     next_date = check_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+                    print(f"🔍 DEBUG: Found next occurrence on {next_date}")
                     next_dates.append(next_date)
                     break
         
         if next_dates:
             next_scheduled_at = min(next_dates)
-                    # Зберігаємо як київський час у форматі YYYY-MM-DDTHH:MM
+            # Зберігаємо як київський час у форматі YYYY-MM-DDTHH:MM
             kyiv_time_str = next_scheduled_at.strftime('%Y-%m-%dT%H:%M')
+            
+
+            print(f"🔍 DEBUG: Scheduling next recurring for mailing ID {mailing_id}")
+            print(f"🔍 DEBUG: Next scheduled date: {next_scheduled_at}")
+            print(f"🔍 DEBUG: Kyiv time string: {kyiv_time_str}")
             
             cursor.execute('''
                 UPDATE recurring_mailings 
@@ -895,12 +917,19 @@ def schedule_next_recurring(mailing_id: int) -> bool:
             
             cursor.execute('''
                 UPDATE mailings 
-                SET next_scheduled_at = ?, scheduled_at = ?, is_scheduled = 1, status = 'scheduled'
+                SET next_scheduled_at = ?, scheduled_at = ?, is_scheduled = 1, status = 'scheduled', is_recurring = 1
                 WHERE id = ?
             ''', (kyiv_time_str, kyiv_time_str, mailing_id))
             
             conn.commit()
             print(f"🔍 DEBUG: Updated scheduled_at to {kyiv_time_str} for mailing ID {mailing_id}")
+            
+            # Проверяем, что обновление прошло успешно
+            cursor.execute('SELECT scheduled_at, id FROM mailings WHERE id = ?', (mailing_id,))
+            result = cursor.fetchone()
+            if result:
+                print(f"🔍 DEBUG: Confirmed scheduled_at in DB: {result[0]} for ID: {result[1]}")
+            
             return True
         
         return False
@@ -1175,11 +1204,13 @@ def create_recurring_mailings_table():
 
 
 def add_recurring_mailing(mailing_id: int, recurring_days: str, recurring_time: str) -> bool:
+    print(f"🔍 DEBUG: add_recurring_mailing called for mailing_id: {mailing_id}, days: {recurring_days}, time: {recurring_time}")
     with get_connection() as conn:
         cursor = conn.cursor()
         
         cursor.execute('SELECT id FROM recurring_mailings WHERE mailing_id = ?', (mailing_id,))
         existing = cursor.fetchone()
+        print(f"🔍 DEBUG: Existing recurring mailing: {existing}")
         
         if existing:
             cursor.execute('''
@@ -1193,10 +1224,20 @@ def add_recurring_mailing(mailing_id: int, recurring_days: str, recurring_time: 
                 VALUES (?, ?, ?)
             ''', (mailing_id, recurring_days, recurring_time))
         
+        # Обновляем is_recurring в таблице mailings
+        cursor.execute('''
+            UPDATE mailings 
+            SET is_recurring = 1
+            WHERE id = ?
+        ''', (mailing_id,))
+        print(f"🔍 DEBUG: Updated is_recurring = 1 for mailing_id: {mailing_id}")
+        
         conn.commit()
         
         # Використовуємо schedule_next_recurring для розрахунку наступної дати
-        return schedule_next_recurring(mailing_id)
+        result = schedule_next_recurring(mailing_id)
+        print(f"🔍 DEBUG: schedule_next_recurring result: {result}")
+        return result
 
 
 def remove_recurring_mailing(mailing_id: int) -> bool:
@@ -1217,67 +1258,6 @@ def remove_recurring_mailing(mailing_id: int) -> bool:
 
 
 
-def schedule_next_recurring(mailing_id: int) -> bool:
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            SELECT recurring_days, recurring_time, next_scheduled_at 
-            FROM recurring_mailings WHERE mailing_id = ? AND is_active = 1
-        ''', (mailing_id,))
-        result = cursor.fetchone()
-        
-        if not result:
-            return False
-        
-        recurring_days = result[0]
-        recurring_time = result[1]
-        current_next = result[2]
-        
-        if not recurring_days or not recurring_time:
-            return False
-        
-        kyiv_tz = pytz.timezone('Europe/Kiev')
-        now = datetime.now(kyiv_tz)
-        
-        try:
-            hour, minute = map(int, recurring_time.split(':'))
-        except Exception as e:
-            return False
-
-        try:
-            days = [int(d) for d in recurring_days.split(',')]
-        except Exception as e:
-            return False
-        
-        next_dates = []
-        for target_day in days:
-            for day_offset in range(1, 8):
-                check_date = now + timedelta(days=day_offset)
-                if check_date.weekday() == target_day:
-                    next_date = check_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
-                    next_dates.append(next_date)
-                    break
-        
-        if next_dates:
-            next_scheduled_at = min(next_dates)
-            
-            cursor.execute('''
-                UPDATE recurring_mailings 
-                SET next_scheduled_at = ?
-                WHERE mailing_id = ?
-            ''', (next_scheduled_at.isoformat(), mailing_id))
-            
-            cursor.execute('''
-                UPDATE mailings 
-                SET next_scheduled_at = ?, is_scheduled = 1, status = 'scheduled'
-                WHERE id = ?
-            ''', (next_scheduled_at.isoformat(), mailing_id))
-            
-            conn.commit()
-            return True
-        
-        return False
 
 def update_admin_password(new_password_hash: str) -> bool:
     with get_connection() as conn:
@@ -1898,6 +1878,13 @@ def update_recurring_mailing(mailing_id: int, recurring_days: str, recurring_tim
             ''', (recurring_days, recurring_time, mailing_id))
             
             if cursor.rowcount > 0:
+                # Обновляем is_recurring в таблице mailings
+                cursor.execute('''
+                    UPDATE mailings 
+                    SET is_recurring = 1
+                    WHERE id = ?
+                ''', (mailing_id,))
+                
                 # Пересчитываем следующую отправку
                 schedule_success = schedule_next_recurring(mailing_id)
                 if schedule_success:
