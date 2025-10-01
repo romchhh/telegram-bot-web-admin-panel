@@ -582,8 +582,10 @@ def add_mailing(name: str, message_text: str, media_type: str = "none",
         
         try:
             from datetime import datetime
+            import pytz
             # Встановлюємо created_at як київський час
-            kyiv_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            kyiv_tz = pytz.timezone('Europe/Kiev')
+            kyiv_time = datetime.now(kyiv_tz).strftime('%Y-%m-%d %H:%M:%S')
             cursor.execute('''
                 INSERT INTO mailings (
                     name, message_text, media_type, media_url, inline_buttons, 
@@ -596,8 +598,10 @@ def add_mailing(name: str, message_text: str, media_type: str = "none",
                   user_filter, user_status, start_param_filter, kyiv_time))
         except Exception as e:
             from datetime import datetime
+            import pytz
             # Встановлюємо created_at як київський час
-            kyiv_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            kyiv_tz = pytz.timezone('Europe/Kiev')
+            kyiv_time = datetime.now(kyiv_tz).strftime('%Y-%m-%d %H:%M:%S')
             cursor.execute('''
             INSERT INTO mailings (name, message_text, media_type, media_url, inline_buttons, status, created_at)
             VALUES (?, ?, ?, ?, ?, 'draft', ?)
@@ -858,9 +862,11 @@ def schedule_next_recurring(mailing_id: int) -> bool:
             return False
         
         from datetime import datetime, timedelta
+        import pytz
         
-                # Використовуємо локальний час (київський)
-        now = datetime.now()
+        # Використовуємо київський час
+        kyiv_tz = pytz.timezone('Europe/Kiev')
+        now = datetime.now(kyiv_tz)
         
         try:
             hour, minute = map(int, recurring_time.split(':'))

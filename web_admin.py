@@ -1421,9 +1421,10 @@ def update_mailing(mailing_id):
         # Нові прості поля планування: день тижня + час (за Києвом)
         ui_weekday_raw = request.form.get('ui_weekday', '').strip()
         ui_time = request.form.get('ui_time', '').strip()
-        is_recurring = request.form.get('is_recurring') == '1'
+        is_recurring_raw = request.form.get('is_recurring', '').strip()
+        is_recurring = is_recurring_raw == '1'
         
-        print(f"DEBUG: ui_weekday={ui_weekday_raw}, ui_time='{ui_time}', is_recurring={is_recurring}")
+        print(f"DEBUG: ui_weekday={ui_weekday_raw}, ui_time='{ui_time}', is_recurring_raw='{is_recurring_raw}', is_recurring={is_recurring}")
         
         if not mailing_name or not message_text:
             flash('Назва та текст розсилки не можуть бути порожніми!', 'error')
@@ -1489,9 +1490,11 @@ def update_mailing(mailing_id):
         if not is_recurring and ui_weekday_raw and ui_time:
             try:
                 from datetime import datetime, timedelta
+                import pytz
+                kyiv_tz = pytz.timezone('Europe/Kiev')
                 target_weekday = int(ui_weekday_raw)
                 hour, minute = map(int, ui_time.split(':'))
-                now = datetime.now()
+                now = datetime.now(kyiv_tz)
                 # Початкова кандидат дата — сьогодні з цим часом
                 candidate = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
                 # Зсув до потрібного дня тижня (0=Mon)

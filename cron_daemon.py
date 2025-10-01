@@ -3,6 +3,7 @@ import time
 import sys
 import os
 from datetime import datetime
+import pytz
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -18,6 +19,7 @@ class MailingCronDaemon:
     def __init__(self, token: str):
         self.token = token
         self.bot = None
+        self.kyiv_tz = pytz.timezone('Europe/Kiev')
         
     async def init_bot(self):
         try:
@@ -36,8 +38,8 @@ class MailingCronDaemon:
     
     async def check_and_send_scheduled_mailings(self):
         try:
-            # Використовуємо локальний час (київський)
-            current_time = datetime.now()
+            # Використовуємо київський час
+            current_time = datetime.now(self.kyiv_tz)
             print(f"🕐 Cron check at: {current_time.strftime('%Y-%m-%d %H:%M:%S')} (Киев)")
             
             scheduled_mailings = get_scheduled_mailings()
@@ -70,8 +72,12 @@ class MailingCronDaemon:
                             # Убираем UTC offset
                             scheduled_at_str = scheduled_at_str.replace('+00:00', '')
                         scheduled_at = datetime.strptime(scheduled_at_str, '%Y-%m-%dT%H:%M')
+                        # Локалізуємо як київський час
+                        scheduled_at = self.kyiv_tz.localize(scheduled_at)
                     else:
                         scheduled_at = datetime.strptime(scheduled_at_str, '%Y-%m-%d %H:%M:%S')
+                        # Локалізуємо як київський час
+                        scheduled_at = self.kyiv_tz.localize(scheduled_at)
                     
                     # Сравниваем время с точностью до минуты
                     current_time_minutes = current_time.replace(second=0, microsecond=0)
