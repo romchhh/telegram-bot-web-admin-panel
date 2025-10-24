@@ -10,7 +10,7 @@ from database.settings_db import (
     get_answers_config, save_answers_config, get_private_lesson_config, save_private_lesson_config,
     get_tariffs_config, save_tariffs_config, get_clothes_tariff_config, save_clothes_tariff_config,
     get_tech_tariff_config, save_tech_tariff_config, get_clothes_payment_config, save_clothes_payment_config,
-    get_tech_payment_config, save_tech_payment_config
+    get_tech_payment_config, save_tech_payment_config, create_subscription_messages_table
 )
 from database.client_db import (
     get_users_count, get_users_with_statuses, admin_update_user_status,
@@ -2227,5 +2227,7 @@ def api_analytics_statuses():
 
 
 if __name__ == '__main__':
+    # Ініціалізуємо таблиці
+    create_subscription_messages_table()
     
     app.run(debug=True, host='0.0.0.0', port=5001)

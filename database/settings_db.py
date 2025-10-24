@@ -1042,6 +1042,28 @@ def create_subscription_messages_table():
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        
+        # Додаємо нові колонки, якщо вони не існують
+        try:
+            cursor.execute('ALTER TABLE subscription_messages ADD COLUMN back_button_text TEXT')
+        except:
+            pass  # Колонка вже існує
+        
+        try:
+            cursor.execute('ALTER TABLE subscription_messages ADD COLUMN main_menu_button_text TEXT')
+        except:
+            pass  # Колонка вже існує
+        
+        try:
+            cursor.execute('ALTER TABLE subscription_messages ADD COLUMN show_back_button INTEGER DEFAULT 0')
+        except:
+            pass  # Колонка вже існує
+        
+        try:
+            cursor.execute('ALTER TABLE subscription_messages ADD COLUMN show_main_menu_button INTEGER DEFAULT 0')
+        except:
+            pass  # Колонка вже існує
+        
         conn.commit()
 
 
