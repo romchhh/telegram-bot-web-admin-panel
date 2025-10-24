@@ -191,7 +191,9 @@ def users_list():
                          total_users=total_users,
                          per_page=per_page,
                          subscription_stats=subscription_stats,
-                         get_stage_id_display=get_stage_id_display)
+                         get_stage_id_display=get_stage_id_display,
+                         max=max,
+                         min=min)
 
 
 @app.route('/analytics')
